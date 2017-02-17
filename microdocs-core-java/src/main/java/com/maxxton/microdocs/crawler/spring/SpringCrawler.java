@@ -22,18 +22,6 @@ import java.util.Map;
  */
 public class SpringCrawler extends Crawler {
 
-    private static final String TYPE_SERVICE = "org.springframework.stereotype.Service";
-    private static final String TYPE_COMPONENT = "org.springframework.stereotype.Component";
-    private static final String TYPE_CONTROLLER = "org.springframework.stereotype.Controller";
-    private static final String TYPE_REST_CONTROLLER = "org.springframework.web.bind.annotation.RestController";
-    private static final String TYPE_REPOSITORY = "org.springframework.stereotype.Repository";
-    private static final String TYPE_SPRING_BOOT_APPLICATION = "org.springframework.boot.autoconfigure.SpringBootApplication";
-    private static final String TYPE_CONFIGURATION = "org.springframework.context.annotation.Configuration";
-    private static final String TYPE_FEIGN_CLIENT = "org.springframework.cloud.netflix.feign.FeignClient";
-
-    private static final String TYPE_REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping";
-
-
     private final ComponentCollector componentCollector;
     private final SchemaCollector schemaCollector;
     private final PathCollector pathCollector;
@@ -41,19 +29,19 @@ public class SpringCrawler extends Crawler {
 
     public SpringCrawler() {
         Map componentsMap = new HashMap();
-        componentsMap.put(TYPE_SERVICE, ComponentType.SERVICE);
-        componentsMap.put(TYPE_COMPONENT, ComponentType.COMPONENT);
-        componentsMap.put(TYPE_CONTROLLER, ComponentType.CONTROLLER);
-        componentsMap.put(TYPE_REST_CONTROLLER, ComponentType.CONTROLLER);
-        componentsMap.put(TYPE_REPOSITORY, ComponentType.REPOSITORY);
-        componentsMap.put(TYPE_SPRING_BOOT_APPLICATION, ComponentType.APPLICATION);
-        componentsMap.put(TYPE_CONFIGURATION, ComponentType.CONFIGURATION);
-        componentsMap.put(TYPE_FEIGN_CLIENT, ComponentType.CLIENT);
+        componentsMap.put(Types.SERVICE, ComponentType.SERVICE);
+        componentsMap.put(Types.COMPONENT, ComponentType.COMPONENT);
+        componentsMap.put(Types.CONTROLLER, ComponentType.CONTROLLER);
+        componentsMap.put(Types.REST_CONTROLLER, ComponentType.CONTROLLER);
+        componentsMap.put(Types.REPOSITORY, ComponentType.REPOSITORY);
+        componentsMap.put(Types.SPRING_BOOT_APPLICATION, ComponentType.APPLICATION);
+        componentsMap.put(Types.CONFIGURATION, ComponentType.CONFIGURATION);
+        componentsMap.put(Types.FEIGN_CLIENT, ComponentType.CLIENT);
         componentCollector = new ComponentCollector(componentsMap);
 
         schemaCollector = new SpringSchemaCollector();
-        pathCollector = new PathCollector(schemaCollector, new String[]{TYPE_REST_CONTROLLER}, TYPE_REQUEST_MAPPING);
-        dependencyCollector = new DependencyCollector(schemaCollector, TYPE_FEIGN_CLIENT, TYPE_REQUEST_MAPPING);
+        pathCollector = new PathCollector(schemaCollector, Types.REST_CONTROLLER);
+        dependencyCollector = new DependencyCollector(schemaCollector);
     }
 
     @Override

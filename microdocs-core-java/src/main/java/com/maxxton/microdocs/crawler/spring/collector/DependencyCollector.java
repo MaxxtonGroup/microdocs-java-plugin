@@ -9,6 +9,7 @@ import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
 import com.maxxton.microdocs.crawler.ErrorReporter;
 import com.maxxton.microdocs.core.domain.path.Path;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
+import com.maxxton.microdocs.crawler.spring.Types;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,20 +22,16 @@ public class DependencyCollector implements Collector<DependencyBuilder> {
 
     private final SchemaCollector schemaCollector;
     private final PathCollector pathCollector;
-    private final String feignClient;
-    private final String requestMapping;
 
-    public DependencyCollector(SchemaCollector schemaCollector, String feignClient, String requestMapping) {
+    public DependencyCollector(SchemaCollector schemaCollector) {
         this.schemaCollector = schemaCollector;
-        this.feignClient = feignClient;
-        this.requestMapping = requestMapping;
-        pathCollector = new PathCollector(schemaCollector, new String[]{feignClient}, requestMapping);
+        pathCollector = new PathCollector(schemaCollector, Types.FEIGN_CLIENT);
     }
 
     @Override
     public List<DependencyBuilder> collect(List<ReflectClass<?>> classes) {
         List<DependencyBuilder> dependencyBuilders = new ArrayList();
-        classes.stream().filter(reflectClass -> reflectClass.hasAnnotation(feignClient)).forEach(client -> {
+        classes.stream().filter(reflectClass -> reflectClass.hasAnnotation(Types.FEIGN_CLIENT.getClassName())).forEach(client -> {
             ErrorReporter.get().printNotice("Crawl client: " + client.getSimpleName());
             dependencyBuilders.add(collect(client));
         });
@@ -44,7 +41,7 @@ public class DependencyCollector implements Collector<DependencyBuilder> {
     private DependencyBuilder collect(ReflectClass<?> client) {
         DependencyBuilder dependencyBuilder = new DependencyBuilder();
         // collect dependency information
-        ReflectAnnotation annotation = client.getAnnotation(feignClient);
+        ReflectAnnotation annotation = client.getAnnotation(Types.FEIGN_CLIENT.getClassName());
         if (annotation != null) {
             if (annotation.getString("value") != null) {
                 dependencyBuilder.title(annotation.getString("value"));
