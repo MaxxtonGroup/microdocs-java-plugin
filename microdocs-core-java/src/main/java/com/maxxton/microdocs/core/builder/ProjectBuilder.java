@@ -8,6 +8,7 @@ import com.maxxton.microdocs.core.domain.common.Tag;
 import com.maxxton.microdocs.core.domain.component.ComponentType;
 import com.maxxton.microdocs.core.domain.dependency.Dependency;
 import com.maxxton.microdocs.core.domain.path.Parameter;
+import com.maxxton.microdocs.core.domain.path.ParameterPlacing;
 import com.maxxton.microdocs.core.domain.path.Response;
 import com.maxxton.microdocs.core.domain.problem.Problem;
 import com.maxxton.microdocs.core.domain.component.Component;
@@ -253,7 +254,21 @@ public class ProjectBuilder implements Builder<Project> {
     if (project.getPaths().get(path) == null) {
       project.getPaths().put(path, new HashMap());
     }
-    project.getPaths().get(path).put(method, endpoint);
+    if(project.getPaths().get(path).get(method) != null){
+      // merge request
+      Path existingPath = project.getPaths().get(path).get(method);
+      endpoint.getParameters().stream()
+          // Filter Only query and header
+          .filter(param -> param.getIn().equals(ParameterPlacing.QUERY) || param.getIn().equals(ParameterPlacing.HEADER))
+          // Filter duplicates
+          .filter(param -> {
+            long count = existingPath.getParameters().stream().filter(eParam -> eParam.getName().equalsIgnoreCase(param.getName())).count();
+            return count == 0;
+          })
+          .forEach(param -> existingPath.getParameters().add(param));
+    }else{
+      project.getPaths().get(path).put(method, endpoint);
+    }
     return this;
   }
 
