@@ -13,7 +13,7 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.7'
     compile files("${System.properties['java.home']}/../lib/tools.jar")
     compile("com.fasterxml.jackson.core:jackson-databind:2.7.5")
-    compile ("com.maxxton:microdocs-core-java:1.7.0")
+    compile ("com.maxxton:microdocs-core-java:1.7.2")
     testCompile("junit:junit:4.12")
 }
 
