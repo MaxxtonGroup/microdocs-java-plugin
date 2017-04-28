@@ -6,6 +6,7 @@ import com.maxxton.microdocs.core.builder.ComponentBuilder;
 import com.maxxton.microdocs.core.domain.component.ComponentType;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
+import com.maxxton.microdocs.crawler.ErrorReporter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,7 @@ public class ComponentCollector implements Collector<ComponentBuilder> {
             }
 
         }
+        ErrorReporter.get().printNotice("Collected " + componentBuilders.size() + " component(s)");
         return componentBuilders;
     }
 

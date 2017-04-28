@@ -28,15 +28,15 @@ public class SpringCrawler extends Crawler {
     private final DependencyCollector dependencyCollector;
 
     public SpringCrawler() {
-        Map componentsMap = new HashMap();
-        componentsMap.put(Types.SERVICE, ComponentType.SERVICE);
-        componentsMap.put(Types.COMPONENT, ComponentType.COMPONENT);
-        componentsMap.put(Types.CONTROLLER, ComponentType.CONTROLLER);
-        componentsMap.put(Types.REST_CONTROLLER, ComponentType.CONTROLLER);
-        componentsMap.put(Types.REPOSITORY, ComponentType.REPOSITORY);
-        componentsMap.put(Types.SPRING_BOOT_APPLICATION, ComponentType.APPLICATION);
-        componentsMap.put(Types.CONFIGURATION, ComponentType.CONFIGURATION);
-        componentsMap.put(Types.FEIGN_CLIENT, ComponentType.CLIENT);
+        Map<String, ComponentType> componentsMap = new HashMap();
+        componentsMap.put(Types.SERVICE.getClassName(), ComponentType.SERVICE);
+        componentsMap.put(Types.COMPONENT.getClassName(), ComponentType.COMPONENT);
+        componentsMap.put(Types.CONTROLLER.getClassName(), ComponentType.CONTROLLER);
+        componentsMap.put(Types.REST_CONTROLLER.getClassName(), ComponentType.CONTROLLER);
+        componentsMap.put(Types.REPOSITORY.getClassName(), ComponentType.REPOSITORY);
+        componentsMap.put(Types.SPRING_BOOT_APPLICATION.getClassName(), ComponentType.APPLICATION);
+        componentsMap.put(Types.CONFIGURATION.getClassName(), ComponentType.CONFIGURATION);
+        componentsMap.put(Types.FEIGN_CLIENT.getClassName(), ComponentType.CLIENT);
         componentCollector = new ComponentCollector(componentsMap);
 
         schemaCollector = new SpringSchemaCollector();
@@ -53,7 +53,7 @@ public class SpringCrawler extends Crawler {
         // extract endpoint
         pathCollector.collect(classes).forEach(pathBuilder -> project.path(pathBuilder));
 
-        // extract depenencies
+        // extract dependencies
         dependencyCollector.collect(classes).forEach(dependencyBuilder -> project.dependency(dependencyBuilder));
 
         // extract schemas
