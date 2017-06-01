@@ -4,11 +4,7 @@ import com.maxxton.microdocs.core.builder.SchemaMappingsBuilder;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.collector.SchemaParser;
 import com.maxxton.microdocs.core.domain.schema.Schema;
-import com.maxxton.microdocs.core.domain.schema.SchemaType;
-import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
-import com.maxxton.microdocs.core.reflect.ReflectClass;
-import com.maxxton.microdocs.core.reflect.ReflectDescription;
-import com.maxxton.microdocs.core.reflect.ReflectGenericClass;
+import com.maxxton.microdocs.core.reflect.*;
 import com.maxxton.microdocs.crawler.spring.parser.PageParser;
 import com.maxxton.microdocs.crawler.spring.parser.ResponseEntityParser;
 
@@ -69,10 +65,16 @@ public class SpringSchemaCollector extends SchemaCollector {
     }
 
     @Override
-    protected void collectProperty(Map<String, Schema> properties, String name, ReflectGenericClass type, List<ReflectAnnotation> annotations, ReflectDescription docs) {
+    protected Schema collectProperty(String name, ReflectGenericClass type, List<ReflectAnnotation> annotations, ReflectDescription docs) {
         Schema fieldSchema = this.collect(type);
         getDefaultValue(fieldSchema, docs);
         SchemaMappingsBuilder mappingsBuilder = new SchemaMappingsBuilder();
+
+        // IGNORE DOWN STREAM
+        List<ReflectDescriptionTag> downstreamCheckTags = docs.getTags("ignoreDownstreamCheck");
+        if(downstreamCheckTags != null && !downstreamCheckTags.isEmpty()){
+            mappingsBuilder.downstreamCheckIgnore(true);
+        }
 
         // RELATIONAL
         // Column name
@@ -104,7 +106,7 @@ public class SpringSchemaCollector extends SchemaCollector {
 
         fieldSchema.setMappings(mappingsBuilder.build());
 
-        properties.put(name, fieldSchema);
+        return fieldSchema;
     }
 
 }

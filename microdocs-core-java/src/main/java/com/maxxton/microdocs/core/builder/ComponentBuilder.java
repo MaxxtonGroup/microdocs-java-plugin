@@ -1,7 +1,7 @@
 package com.maxxton.microdocs.core.builder;
 
 import com.maxxton.microdocs.core.domain.component.ComponentType;
-import com.maxxton.microdocs.crawler.ErrorReporter;
+import com.maxxton.microdocs.core.logging.Logger;
 import com.maxxton.microdocs.core.domain.component.Annotation;
 import com.maxxton.microdocs.core.domain.component.Component;
 import com.maxxton.microdocs.core.domain.component.Method;
@@ -72,7 +72,7 @@ public class ComponentBuilder implements Builder<Component> {
         if(name != null){
             component.getAnnotations().put(name, annotation);
         }else{
-            ErrorReporter.get().printWarning("Name annotation on " + component.getName() + " is empty");
+            Logger.get().warning("Name annotation on " + component.getName() + " is empty");
         }
         return this;
     }

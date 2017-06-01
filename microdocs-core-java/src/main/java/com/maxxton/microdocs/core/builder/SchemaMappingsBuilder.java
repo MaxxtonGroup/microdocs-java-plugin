@@ -32,6 +32,13 @@ public class SchemaMappingsBuilder implements Builder<SchemaMappings> {
         }
     }
 
+    private void initDownstreamCheck(){
+        init();
+        if(mappings.getDownstreamCheck() == null){
+            mappings.setDownstreamCheck(new SchemaMapping());
+        }
+    }
+
     public SchemaMappingsBuilder jsonIgnore(boolean ignore){
         initJson();
         mappings.getJson().setIgnore(ignore);
@@ -77,6 +84,12 @@ public class SchemaMappingsBuilder implements Builder<SchemaMappings> {
     public SchemaMappingsBuilder relationalTables(List<String> tables){
         initRelational();
         mappings.getRelational().setTables(tables);
+        return this;
+    }
+
+    public SchemaMappingsBuilder downstreamCheckIgnore(boolean ignore){
+        initDownstreamCheck();
+        mappings.getDownstreamCheck().setIgnore(ignore);
         return this;
     }
 

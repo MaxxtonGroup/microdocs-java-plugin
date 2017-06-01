@@ -2,7 +2,7 @@ package com.maxxton.microdocs.core.collector;
 
 import com.maxxton.microdocs.core.domain.schema.*;
 import com.maxxton.microdocs.core.reflect.*;
-import com.maxxton.microdocs.crawler.ErrorReporter;
+import com.maxxton.microdocs.core.logging.Logger;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,7 +59,7 @@ public class SchemaCollector {
   }
 
   private Schema collectSchema(ReflectClass reflectClass, List<ReflectGenericClass> genericClasses) {
-    ErrorReporter.get().printNotice("Collect Schema: " + reflectClass.getName());
+    Logger.get().debug("Collect Schema: " + reflectClass.getName());
     for (SchemaParser schemaParser : schemaParsers) {
       if (schemaParser.getClassName().equals(reflectClass.getName())) {
         return schemaParser.parse(reflectClass, genericClasses, this);
@@ -164,24 +164,65 @@ public class SchemaCollector {
     schema.setName(reflectClass.getSimpleName());
     schema.setGeneric(collectGeneric(genericClasses));
     Map<String, Schema> properties = new HashMap();
-    for (ReflectField field : reflectClass.getDeclaredFields()) {
-      String name = field.getSimpleName();
-      List<ReflectAnnotation> reflectAnnotations = field.getAnnotations().stream().collect(Collectors.toList());
-      reflectClass.getDeclaredMethods().stream()
-          .filter(method ->
-              name.equalsIgnoreCase("is" + method.getSimpleName()) ||
-                  name.equalsIgnoreCase("has" + method.getSimpleName()) ||
-                  name.equalsIgnoreCase("get" + method.getSimpleName()) ||
-                  name.equalsIgnoreCase("set" + method.getSimpleName()))
-          .forEach(method -> reflectAnnotations.addAll(method.getAnnotations()));
 
-      collectProperty(properties, name, field.getType(), field.getAnnotations(), field.getDescription());
+    // Collect getter and setters
+    Map<String, PropertyBucket> propertyBuckets = new HashMap();
+    reflectClass.getDeclaredMethods().stream()
+        .filter(method ->
+            method.getSimpleName().startsWith("is") ||
+                method.getSimpleName().startsWith("has") ||
+                method.getSimpleName().startsWith("get") ||
+                method.getSimpleName().startsWith("set"))
+        .forEach(method -> {
+          String propertyName = method.getSimpleName().startsWith("is") ? method.getSimpleName().substring(2) : method.getSimpleName().substring(3);
+          propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
+          ReflectGenericClass type = null;
+          if(method.getSimpleName().startsWith("set")){
+            if(!method.getParameters().isEmpty()){
+              type = method.getParameters().get(0).getType();
+            }
+          }else{
+            type = method.getReturnType();
+          }
+
+          PropertyBucket bucket;
+          if(propertyBuckets.containsKey(propertyName)){
+            bucket = propertyBuckets.get(propertyName);
+          }else{
+            bucket = new PropertyBucket();
+            propertyBuckets.put(propertyName, bucket);
+          }
+
+          bucket.setType(type);
+          bucket.addAnnotations(method.getAnnotations());
+          bucket.addDescription(method.getDescription());
+        });
+
+    // Collect properties
+    for (ReflectField field : reflectClass.getDeclaredFields()) {
+      String propertyName = field.getSimpleName();
+      if(propertyBuckets.containsKey(propertyName)){
+        PropertyBucket bucket = propertyBuckets.get(propertyName);
+        bucket.setType(field.getType());
+        bucket.addAnnotations(field.getAnnotations());
+        bucket.addDescription(field.getDescription());
+      }
     }
+
+    // Empty property buckets
+    Logger.get().debug(propertyBuckets.size() + " buckets in " + reflectClass.getSimpleName());
+    for(Map.Entry<String, PropertyBucket> entry : propertyBuckets.entrySet()){
+      Logger.get().debug("- " + entry.getKey() + ":" + entry.getValue().getType().getClassType().getName() + " - " + entry.getValue().getDescription().getTags().size() + " - " + entry.getValue().getAnnotations().size());
+      Schema propertySchema = collectProperty(entry.getKey(), entry.getValue().getType(), entry.getValue().getAnnotations(), entry.getValue().getDescription());
+      Logger.get().debug("schematype: " + propertySchema.getType() + " [" + propertySchema + "]");
+      properties.put(entry.getKey(), propertySchema);
+    }
+
     schema.setProperties(properties);
 
-    if(reflectClass.getSuperClass() != null &&
+    if (reflectClass.getSuperClass() != null &&
         reflectClass.getSuperClass().getClassType() != null &&
-        !Object.class.getName().equals(reflectClass.getSuperClass().getClassType().getName())){
+        !Object.class.getName().equals(reflectClass.getSuperClass().getClassType().getName())) {
       Schema superSchema = collect(reflectClass.getSuperClass());
       List<Schema> superList = new ArrayList();
       superList.add(superSchema);
@@ -206,10 +247,10 @@ public class SchemaCollector {
     return generics;
   }
 
-  protected void collectProperty(Map<String, Schema> properties, String name, ReflectGenericClass type, List<ReflectAnnotation> annotations, ReflectDescription docs) {
+  protected Schema collectProperty(String name, ReflectGenericClass type, List<ReflectAnnotation> annotations, ReflectDescription docs) {
     Schema fieldSchema = collect(type);
     getDefaultValue(fieldSchema, docs);
-    properties.put(name, fieldSchema);
+    return fieldSchema;
   }
 
   protected void getDefaultValue(Schema fieldSchema, ReflectDescription docs) {
@@ -233,4 +274,50 @@ public class SchemaCollector {
     }
   }
 
+  private class PropertyBucket {
+
+    private ReflectGenericClass type;
+    private List<ReflectAnnotation> annotations = new ArrayList();
+    private List<ReflectDescription> descriptions = new ArrayList();
+
+    public ReflectGenericClass getType() {
+      return type;
+    }
+
+    public List<ReflectAnnotation> getAnnotations() {
+      return annotations;
+    }
+
+    public ReflectDescription getDescription() {
+      ReflectDescription desc = new ReflectDescription();
+      if(!descriptions.isEmpty()){
+        for(int i = descriptions.size()-1; i >= 0; i--){
+          if(descriptions.get(i).getText() != null && !descriptions.get(i).getText().trim().isEmpty()){
+            desc.setText(descriptions.get(i).getText());
+            break;
+          }
+        }
+        List<ReflectDescriptionTag> tags = new ArrayList();
+        descriptions.forEach(description -> {
+          description.getTags().forEach(tag -> {
+            tags.add(tag);
+          });
+        });
+        desc.setTags(tags);
+      }
+      return desc;
+    }
+
+    public void addDescription(ReflectDescription description){
+      descriptions.add(description);
+    }
+
+    public void addAnnotations(List<ReflectAnnotation> annotations){
+      this.annotations.addAll(annotations);
+    }
+
+    public void setType(ReflectGenericClass type) {
+      this.type = type;
+    }
+  }
 }

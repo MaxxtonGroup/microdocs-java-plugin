@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  */
 public class ReflectDescription {
 
-    private String text;
+    private String text = "";
     private List<ReflectDescriptionTag> tags = new ArrayList();
 
     public String getText() {

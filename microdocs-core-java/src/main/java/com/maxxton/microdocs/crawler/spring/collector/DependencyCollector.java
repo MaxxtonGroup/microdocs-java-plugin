@@ -6,7 +6,7 @@ import com.maxxton.microdocs.core.collector.Collector;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.domain.dependency.DependencyType;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
-import com.maxxton.microdocs.crawler.ErrorReporter;
+import com.maxxton.microdocs.core.logging.Logger;
 import com.maxxton.microdocs.core.domain.path.Path;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
 import com.maxxton.microdocs.crawler.spring.Types;
@@ -32,7 +32,7 @@ public class DependencyCollector implements Collector<DependencyBuilder> {
     public List<DependencyBuilder> collect(List<ReflectClass<?>> classes) {
         List<DependencyBuilder> dependencyBuilders = new ArrayList();
         classes.stream().filter(reflectClass -> reflectClass.hasAnnotation(Types.FEIGN_CLIENT.getClassName())).forEach(client -> {
-            ErrorReporter.get().printNotice("Crawl client: " + client.getSimpleName());
+            Logger.get().debug("Crawl client: " + client.getSimpleName());
             dependencyBuilders.add(collect(client));
         });
         return dependencyBuilders;

@@ -1,9 +1,10 @@
 package com.maxxton.microdocs.crawler.doclet;
 
 import com.maxxton.microdocs.core.domain.common.ProjectInfo;
+import com.maxxton.microdocs.core.logging.LogLevel;
+import com.maxxton.microdocs.core.logging.Logger;
 import com.maxxton.microdocs.core.writer.Writer;
 import com.maxxton.microdocs.crawler.Crawler;
-import com.maxxton.microdocs.crawler.ErrorReporter;
 import com.maxxton.microdocs.core.domain.Project;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
 import com.maxxton.microdocs.core.writer.JsonWriter;
@@ -24,8 +25,9 @@ public class DocletRunner extends Standard {
     private static Configuration config = new Configuration();
 
     public static boolean start(RootDoc root) {
-        ErrorReporter.set(new DocletErrorReporter(root));
+        Logger.set(new DocletErrorReporter(root, LogLevel.INFO));
         config.options = root.options();
+        Logger.get().info("Collect MicroDocs definitions for " + config.getGroup() + "/" + config.getProjectName() + ":" + config.getVersion());
 
         // get crawler
         Crawler crawler = null;
