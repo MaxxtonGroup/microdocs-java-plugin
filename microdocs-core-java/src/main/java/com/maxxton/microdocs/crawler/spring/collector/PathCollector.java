@@ -7,7 +7,7 @@ import com.maxxton.microdocs.core.domain.path.*;
 import com.maxxton.microdocs.core.domain.schema.Schema;
 import com.maxxton.microdocs.core.domain.schema.SchemaType;
 import com.maxxton.microdocs.core.reflect.*;
-import com.maxxton.microdocs.crawler.ErrorReporter;
+import com.maxxton.microdocs.core.logging.Logger;
 import com.maxxton.microdocs.crawler.spring.Types;
 import com.maxxton.microdocs.crawler.spring.parser.PageableParser;
 import com.maxxton.microdocs.crawler.spring.parser.SpecificationsParser;
@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
  */
 public class PathCollector implements Collector<PathBuilder> {
 
-  private final String[] defaultConsumes = new String[] { "application/json" };
-  private final String[] defaultProduces = new String[] { "application/json" };
+  private final String[] defaultConsumes = new String[]{"application/json"};
+  private final String[] defaultProduces = new String[]{"application/json"};
 
   private static final String TYPE_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
   private static final String TYPE_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
@@ -29,7 +29,7 @@ public class PathCollector implements Collector<PathBuilder> {
 
   private SchemaCollector schemaCollector;
   private final String[] controllers;
-  private final List<String> requestMappers = Arrays.asList(new String[] {
+  private final List<String> requestMappers = Arrays.asList(new String[]{
       Types.REQUEST_MAPPING.getClassName(),
       Types.GET_MAPPING.getClassName(),
       Types.DELETE_MAPPING.getClassName(),
@@ -38,7 +38,7 @@ public class PathCollector implements Collector<PathBuilder> {
       Types.PUT_MAPPING.getClassName()
   });
 
-  private final RequestParser[] requestParsers = new RequestParser[] { new PageableParser(), new SpecificationsParser() };
+  private final RequestParser[] requestParsers = new RequestParser[]{new PageableParser(), new SpecificationsParser()};
 
   public PathCollector(SchemaCollector schemaCollector, Types... controllers) {
     this.schemaCollector = schemaCollector;
@@ -49,13 +49,14 @@ public class PathCollector implements Collector<PathBuilder> {
 
   }
 
-  @Override public List<PathBuilder> collect(List<ReflectClass<?>> classes) {
+  @Override
+  public List<PathBuilder> collect(List<ReflectClass<?>> classes) {
     List<PathBuilder> pathBuilders = new ArrayList();
     classes.stream().filter(reflectClass -> reflectClass.hasAnnotation(controllers)).forEach(controller -> {
-      ErrorReporter.get().printNotice("Crawl controller: " + controller.getSimpleName());
+      Logger.get().debug("Crawl controller: " + controller.getSimpleName());
       String[] mappers = requestMappers.toArray(new String[requestMappers.size()]);
       controller.getDeclaredMethods().stream().filter(method -> method.hasAnnotation(mappers)).forEach(method -> {
-        ErrorReporter.get().printNotice("Crawl controller method: " + method.getSimpleName());
+        Logger.get().debug("Crawl controller method: " + method.getSimpleName());
         pathBuilders.addAll(collectPaths(controller, method));
       });
     });
@@ -82,27 +83,28 @@ public class PathCollector implements Collector<PathBuilder> {
     if (fullPath.contains("?")) {
       String[] pathSplit = fullPath.split("\\?");
       path = pathSplit[0];
-      String paramsSplit = pathSplit[1];
+      if (pathSplit.length >= 2){
+        String paramsSplit = pathSplit[1];
 
-      String[] params = paramsSplit.split("&");
-      for (String param : params) {
-        String[] paramSplit = param.split("=");
-        ParameterVariable parameter = new ParameterVariable();
-        parameter.setIn(ParameterPlacing.QUERY);
-        parameter.setName(paramSplit[0]);
-        parameter.setRequired(true);
-        parameter.setType(SchemaType.ANY);
-        if (paramSplit.length > 1) {
-          parameter.setDefaultValue(paramSplit[1]);
-          parameter.setType(SchemaType.ENUM);
-          List enums = new ArrayList();
-          enums.add(paramSplit[1]);
-          parameter.setEnums(enums);
+        String[] params = paramsSplit.split("&");
+        for (String param : params) {
+          String[] paramSplit = param.split("=");
+          ParameterVariable parameter = new ParameterVariable();
+          parameter.setIn(ParameterPlacing.QUERY);
+          parameter.setName(paramSplit[0]);
+          parameter.setRequired(true);
+          parameter.setType(SchemaType.ANY);
+          if (paramSplit.length > 1) {
+            parameter.setDefaultValue(paramSplit[1]);
+            parameter.setType(SchemaType.ENUM);
+            List enums = new ArrayList();
+            enums.add(paramSplit[1]);
+            parameter.setEnums(enums);
+          }
+          parameters.add(parameter);
         }
-        parameters.add(parameter);
       }
-    }
-    else {
+    } else {
       path = fullPath;
     }
 
@@ -112,13 +114,10 @@ public class PathCollector implements Collector<PathBuilder> {
     methods.addAll(getMethods(methodRequestMapping));
     if (methods.isEmpty()) { //use default
       methods.add("get");
-      methods.add("post");
-      methods.add("put");
-      methods.add("delete");
-      methods.add("options");
-      methods.add("head");
-      methods.add("patch");
     }
+    methods.forEach(requestMethod -> {
+      Logger.get().logEndpoint(requestMethod, path);
+    });
 
     Set<String> produces = new HashSet();
     for (String mime : defaultProduces) {
@@ -167,16 +166,14 @@ public class PathCollector implements Collector<PathBuilder> {
         bodyParam.setDescription(description);
         bodyParam.setIn(ParameterPlacing.BODY);
         parameters.add(bodyParam);
-      }
-      else if (parameter.hasAnnotation(TYPE_REQUEST_PARAM)) {
+      } else if (parameter.hasAnnotation(TYPE_REQUEST_PARAM)) {
         ReflectAnnotation annotation = parameter.getAnnotation(TYPE_REQUEST_PARAM);
         ParameterVariable param = new ParameterVariable();
         param.setIn(ParameterPlacing.QUERY);
 
         if (annotation.has("value")) {
           name = annotation.getString("value");
-        }
-        else if (annotation.has("name")) {
+        } else if (annotation.has("name")) {
           name = annotation.getString("name");
         }
         param.setName(name);
@@ -185,16 +182,14 @@ public class PathCollector implements Collector<PathBuilder> {
         param.setDefaultValue(annotation.getString("defaultValue"));
         param.setType(schema != null ? schema.getType() : null);
         parameters.add(param);
-      }
-      else if (parameter.hasAnnotation(TYPE_PATH_VARIABLE)) {
+      } else if (parameter.hasAnnotation(TYPE_PATH_VARIABLE)) {
         ReflectAnnotation annotation = parameter.getAnnotation(TYPE_PATH_VARIABLE);
         ParameterVariable param = new ParameterVariable();
         param.setIn(ParameterPlacing.PATH);
 
         if (annotation.has("value")) {
           name = annotation.getString("value");
-        }
-        else if (annotation.has("name")) {
+        } else if (annotation.has("name")) {
           name = annotation.getString("name");
         }
         param.setName(name);
@@ -205,6 +200,7 @@ public class PathCollector implements Collector<PathBuilder> {
       }
     }
 
+    // Find responses
     Map<String, Response> responses = new HashMap();
     if (method.getReturnType() != null && method.getReturnType().getClassType() != null && !method.getReturnType().getClassType().getSimpleName().equalsIgnoreCase("void")) {
       Response response = new Response();
@@ -250,8 +246,7 @@ public class PathCollector implements Collector<PathBuilder> {
     if (requestMapping != null) {
       if (requestMapping.has("value")) {
         return requestMapping.getString("value");
-      }
-      else if (requestMapping.has("path")) {
+      } else if (requestMapping.has("path")) {
         return requestMapping.getString("path");
       }
     }
@@ -262,15 +257,15 @@ public class PathCollector implements Collector<PathBuilder> {
     Set<String> methodSet = new HashSet();
     if (requestMapping != null) {
 
-      if(requestMapping.getName().equals(Types.GET_MAPPING.getClassName())){
+      if (requestMapping.getName().equals(Types.GET_MAPPING.getClassName())) {
         methodSet.add("get");
-      }else if(requestMapping.getName().equals(Types.DELETE_MAPPING.getClassName())){
+      } else if (requestMapping.getName().equals(Types.DELETE_MAPPING.getClassName())) {
         methodSet.add("delete");
-      }else if(requestMapping.getName().equals(Types.POST_MAPPING.getClassName())){
+      } else if (requestMapping.getName().equals(Types.POST_MAPPING.getClassName())) {
         methodSet.add("post");
-      }else if(requestMapping.getName().equals(Types.PUT_MAPPING.getClassName())){
+      } else if (requestMapping.getName().equals(Types.PUT_MAPPING.getClassName())) {
         methodSet.add("put");
-      }else if(requestMapping.getName().equals(Types.PATCH_MAPPING.getClassName())){
+      } else if (requestMapping.getName().equals(Types.PATCH_MAPPING.getClassName())) {
         methodSet.add("patch");
       }
 

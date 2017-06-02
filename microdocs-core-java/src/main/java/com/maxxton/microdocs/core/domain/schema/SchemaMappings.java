@@ -7,6 +7,7 @@ public class SchemaMappings {
 
     private SchemaMapping json;
     private SchemaMapping relational;
+    private SchemaMapping downstreamCheck;
 
     public SchemaMapping getJson() {
         return json;
@@ -22,5 +23,13 @@ public class SchemaMappings {
 
     public void setRelational(SchemaMapping relational) {
         this.relational = relational;
+    }
+
+    public SchemaMapping getDownstreamCheck() {
+        return downstreamCheck;
+    }
+
+    public void setDownstreamCheck(SchemaMapping downstreamCheck) {
+        this.downstreamCheck = downstreamCheck;
     }
 }

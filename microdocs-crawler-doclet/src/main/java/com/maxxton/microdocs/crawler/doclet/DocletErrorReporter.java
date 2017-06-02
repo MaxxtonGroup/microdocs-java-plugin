@@ -1,38 +1,47 @@
 package com.maxxton.microdocs.crawler.doclet;
 
-import com.maxxton.microdocs.crawler.ErrorReporter;
+import com.maxxton.microdocs.core.logging.LogLevel;
+import com.maxxton.microdocs.core.logging.Logger;
 import com.sun.javadoc.DocErrorReporter;
 
 /**
- *
  * @author Steven Hermans
  */
-public class DocletErrorReporter extends ErrorReporter {
+public class DocletErrorReporter extends Logger {
 
-    private final DocErrorReporter delegate;
+  private final DocErrorReporter delegate;
 
-    public DocletErrorReporter(DocErrorReporter errorReporter) {
-        this.delegate = errorReporter;
+  public DocletErrorReporter(DocErrorReporter errorReporter, LogLevel logLevel) {
+    this.delegate = errorReporter;
+    this.setLevel(logLevel);
+  }
+
+  public void error(String msg) {
+    super.error(msg);
+    if (getLevel().match(LogLevel.ERROR)) {
+      delegate.printError(msg);
     }
+  }
 
-    public void printError(String msg) {
-        super.printError(msg);
-        delegate.printError(msg);
+  public void error(String msg, Throwable e) {
+    super.error(msg, e);
+    if (getLevel().match(LogLevel.ERROR)) {
+      delegate.printError(msg);
     }
+  }
 
-    public void printError(String msg, Throwable e) {
-        super.printError(msg, e);
-        delegate.printError(msg);
+  public void info(String msg) {
+    super.info(msg);
+    if (getLevel().match(LogLevel.INFO)) {
+    delegate.printNotice(msg);
     }
+  }
 
-    public void printNotice(String msg) {
-        super.printNotice(msg);
-        delegate.printNotice(msg);
+  public void warning(String msg) {
+    super.warning(msg);
+    if (getLevel().match(LogLevel.WARNING)) {
+    delegate.printWarning(msg);
     }
-
-    public void printWarning(String msg) {
-        super.printWarning(msg);
-        delegate.printWarning(msg);
-    }
+  }
 
 }

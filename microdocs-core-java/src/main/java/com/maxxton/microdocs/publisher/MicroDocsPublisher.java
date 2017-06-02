@@ -8,10 +8,9 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.http.utils.URLParamEncoder;
 import com.mashape.unirest.request.HttpRequestWithBody;
-import com.mashape.unirest.request.body.RequestBodyEntity;
 import com.maxxton.microdocs.core.domain.check.CheckProblem;
 import com.maxxton.microdocs.core.domain.check.CheckResponse;
-import com.maxxton.microdocs.crawler.ErrorReporter;
+import com.maxxton.microdocs.core.logging.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +39,7 @@ public class MicroDocsPublisher {
     String report = loadReport(microDocsReport);
 
     String url = configuration.getUrl() + "/api/v1/projects/" + URLParamEncoder.encode(projectName);
-    ErrorReporter.get().printNotice("PUT " + url);
+    Logger.get().debug("PUT " + url);
     initObjectMapper();
     HttpResponse<CheckResponse> response = null;
     try {
@@ -84,7 +83,7 @@ public class MicroDocsPublisher {
     String report = loadReport(microDocsReport);
 
     String url = configuration.getUrl() + "/api/v1/check";
-    ErrorReporter.get().printNotice("POST " + url);
+    Logger.get().debug("POST " + url);
     initObjectMapper();
     HttpResponse<CheckResponse> response = null;
     try {
@@ -114,7 +113,7 @@ public class MicroDocsPublisher {
    * @return content of the report as string
    */
   private static String loadReport(File microDocsReport) throws IOException {
-    ErrorReporter.get().printNotice("Load " + microDocsReport.getAbsolutePath());
+    Logger.get().debug("Load " + microDocsReport.getAbsolutePath());
     byte[] encoded = Files.readAllBytes(Paths.get(microDocsReport.toURI()));
     return new String(encoded);
   }
@@ -177,9 +176,9 @@ public class MicroDocsPublisher {
       message += "No problems found";
     }
     if(hasProblems){
-      ErrorReporter.get().printError(message);
+      Logger.get().error(message);
     }else{
-      ErrorReporter.get().printNotice(message);
+      Logger.get().debug(message);
     }
 
     if(response.getProblems() != null) {
@@ -192,13 +191,13 @@ public class MicroDocsPublisher {
           msg += "\nBreaking change detected with " + problem.getClient().getTitle() + " (source: " + problem.getClient().getSourceLink() != null ? problem.getClient().getSourceLink() : problem.getClient().getClassName() + " )";
         }
         if(hasProblems) {
-          ErrorReporter.get().printError(msg);
+          Logger.get().error(msg);
         }else{
-          ErrorReporter.get().printNotice(msg);
+          Logger.get().debug(msg);
         }
       }
     }
-    ErrorReporter.get().printError("");
+    Logger.get().error("");
 
     return !hasProblems;
   }
