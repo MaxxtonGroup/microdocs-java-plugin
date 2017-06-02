@@ -83,24 +83,26 @@ public class PathCollector implements Collector<PathBuilder> {
     if (fullPath.contains("?")) {
       String[] pathSplit = fullPath.split("\\?");
       path = pathSplit[0];
-      String paramsSplit = pathSplit[1];
+      if (pathSplit.length >= 2){
+        String paramsSplit = pathSplit[1];
 
-      String[] params = paramsSplit.split("&");
-      for (String param : params) {
-        String[] paramSplit = param.split("=");
-        ParameterVariable parameter = new ParameterVariable();
-        parameter.setIn(ParameterPlacing.QUERY);
-        parameter.setName(paramSplit[0]);
-        parameter.setRequired(true);
-        parameter.setType(SchemaType.ANY);
-        if (paramSplit.length > 1) {
-          parameter.setDefaultValue(paramSplit[1]);
-          parameter.setType(SchemaType.ENUM);
-          List enums = new ArrayList();
-          enums.add(paramSplit[1]);
-          parameter.setEnums(enums);
+        String[] params = paramsSplit.split("&");
+        for (String param : params) {
+          String[] paramSplit = param.split("=");
+          ParameterVariable parameter = new ParameterVariable();
+          parameter.setIn(ParameterPlacing.QUERY);
+          parameter.setName(paramSplit[0]);
+          parameter.setRequired(true);
+          parameter.setType(SchemaType.ANY);
+          if (paramSplit.length > 1) {
+            parameter.setDefaultValue(paramSplit[1]);
+            parameter.setType(SchemaType.ENUM);
+            List enums = new ArrayList();
+            enums.add(paramSplit[1]);
+            parameter.setEnums(enums);
+          }
+          parameters.add(parameter);
         }
-        parameters.add(parameter);
       }
     } else {
       path = fullPath;
