@@ -32,10 +32,10 @@ public class SchemaMappingsBuilder implements Builder<SchemaMappings> {
         }
     }
 
-    private void initDownstreamCheck(){
+    private void initClient(){
         init();
-        if(mappings.getDownstreamCheck() == null){
-            mappings.setDownstreamCheck(new SchemaMapping());
+        if(mappings.getClient() == null){
+            mappings.setClient(new SchemaMapping());
         }
     }
 
@@ -87,9 +87,15 @@ public class SchemaMappingsBuilder implements Builder<SchemaMappings> {
         return this;
     }
 
-    public SchemaMappingsBuilder downstreamCheckIgnore(boolean ignore){
-        initDownstreamCheck();
-        mappings.getDownstreamCheck().setIgnore(ignore);
+    public SchemaMappingsBuilder clientIgnore(boolean ignore){
+        initClient();
+        mappings.getClient().setIgnore(ignore);
+        return this;
+    }
+
+    public SchemaMappingsBuilder clientName(String name){
+        initClient();
+        mappings.getClient().setName(name);
         return this;
     }
 
