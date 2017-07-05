@@ -30,6 +30,7 @@ public class SpringSchemaCollector extends SchemaCollector {
 
   private static final String JSON_PROPERTY_TYPE = "com.fasterxml.jackson.annotation.JsonProperty";
   private static final String JSON_IGNORE_TYPE = "com.fasterxml.jackson.annotation.JsonIgnore";
+  private static final String JSON_SUB_TYPES = "com.fasterxml.jackson.annotation.JsonSubTypes";
 
   private static final String FEIGN_PROPERTY = "com.maxxton.common.feign.FeignProperty";
   private static final String IGNORE_DOWNSTREAM_CHECK = "ignoreDownstreamCheck";
@@ -55,8 +56,8 @@ public class SpringSchemaCollector extends SchemaCollector {
     if (isEntity) {
       List<String> tables = new ArrayList();
       for (String type : TABLE_TYPES) {
-        if (reflectClass.getAnnotation(type) != null && reflectClass.getAnnotation(type).get("name") != null && !reflectClass.getAnnotation(type).get("name").isEmpty()) {
-          tables.add(reflectClass.getAnnotation(type).get("name").replace("\"", "").toUpperCase());
+        if (reflectClass.getAnnotation(type) != null && reflectClass.getAnnotation(type).get("name") != null && !reflectClass.getAnnotation(type).get("name").getString().isEmpty()) {
+          tables.add(reflectClass.getAnnotation(type).get("name").getString().replace("\"", "").toUpperCase());
         }
       }
       if (tables.isEmpty()) {
@@ -82,16 +83,16 @@ public class SpringSchemaCollector extends SchemaCollector {
     }
     // Property name
     annotations.stream().filter(annotation -> annotation.getName().equals(FEIGN_PROPERTY)).forEach(annotation -> {
-      if (annotation.getString("value") != null && !annotation.getString("value").isEmpty() && !name.equals(annotation.getString("value"))) {
-        mappingsBuilder.clientName(annotation.getString("value").replace("\"", ""));
+      if (annotation.get("value").getString() != null && !annotation.get("value").getString().isEmpty() && !name.equals(annotation.get("value").getString())) {
+        mappingsBuilder.clientName(annotation.get("value").getString().replace("\"", ""));
       }
     });
 
     // RELATIONAL
     // Column name
     annotations.stream().filter(annotation -> annotation.getName().equals(COLUMN_TYPE)).forEach(annotation -> {
-      if (annotation.getString("name") != null && !annotation.getString("name").isEmpty() && !name.equals(annotation.getString("name"))) {
-        mappingsBuilder.relationalName(annotation.getString("name").replace("\"", ""));
+      if (annotation.get("name").getString() != null && !annotation.get("name").getString().isEmpty() && !name.equals(annotation.get("name").getString())) {
+        mappingsBuilder.relationalName(annotation.get("name").getString().replace("\"", ""));
       }
     });
     // Ignore
@@ -106,8 +107,8 @@ public class SpringSchemaCollector extends SchemaCollector {
     // JSON
     // Property
     annotations.stream().filter(annotation -> annotation.getName().equals(JSON_PROPERTY_TYPE)).forEach(annotation -> {
-      if (annotation.getString("value") != null && !annotation.getString("value").isEmpty() && !name.equals(annotation.getString("value"))) {
-        mappingsBuilder.jsonName(annotation.getString("value").replace("\"", ""));
+      if (annotation.get("value").getString() != null && !annotation.get("value").getString().isEmpty() && !name.equals(annotation.get("value").getString())) {
+        mappingsBuilder.jsonName(annotation.get("value").getString().replace("\"", ""));
       }
     });
     // Ignore

@@ -43,12 +43,12 @@ public class DependencyCollector implements Collector<DependencyBuilder> {
         // collect dependency information
         ReflectAnnotation annotation = client.getAnnotation(Types.FEIGN_CLIENT.getClassName());
         if (annotation != null) {
-            if (annotation.getString("value") != null) {
-                dependencyBuilder.title(annotation.getString("value"));
-            } else if (annotation.getString("name") != null) {
-                dependencyBuilder.title(annotation.getString("name"));
-            } else if (annotation.getString("serviceId") != null) {
-                dependencyBuilder.title(annotation.getString("serviceId"));
+            if (annotation.get("value") != null && annotation.get("value").getString() != null) {
+                dependencyBuilder.title(annotation.get("value").getString());
+            } else if (annotation.get("name") != null && annotation.get("name").getString() != null) {
+                dependencyBuilder.title(annotation.get("name").getString());
+            } else if (annotation.get("serviceId") != null && annotation.get("serviceId").getString() != null) {
+                dependencyBuilder.title(annotation.get("serviceId").getString());
             }else{
                 throw new RuntimeException("Missing serviceId in @FeignClient on " + client.getName());
             }

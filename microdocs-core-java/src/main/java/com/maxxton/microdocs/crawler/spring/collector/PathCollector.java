@@ -172,14 +172,14 @@ public class PathCollector implements Collector<PathBuilder> {
         param.setIn(ParameterPlacing.QUERY);
 
         if (annotation.has("value")) {
-          name = annotation.getString("value");
+          name = annotation.get("value").getString();
         } else if (annotation.has("name")) {
-          name = annotation.getString("name");
+          name = annotation.get("name").getString();
         }
         param.setName(name);
         param.setDescription(description);
-        param.setRequired(annotation.getBoolean("required"));
-        param.setDefaultValue(annotation.getString("defaultValue"));
+        param.setRequired(annotation.get("required").getBoolean());
+        param.setDefaultValue(annotation.get("defaultValue").getObject());
         param.setType(schema != null ? schema.getType() : null);
         parameters.add(param);
       } else if (parameter.hasAnnotation(TYPE_PATH_VARIABLE)) {
@@ -188,9 +188,9 @@ public class PathCollector implements Collector<PathBuilder> {
         param.setIn(ParameterPlacing.PATH);
 
         if (annotation.has("value")) {
-          name = annotation.getString("value");
+          name = annotation.get("value").getString();
         } else if (annotation.has("name")) {
-          name = annotation.getString("name");
+          name = annotation.get("name").getString();
         }
         param.setName(name);
         param.setDescription(description);
@@ -245,9 +245,9 @@ public class PathCollector implements Collector<PathBuilder> {
   private String getPath(ReflectAnnotation requestMapping) {
     if (requestMapping != null) {
       if (requestMapping.has("value")) {
-        return requestMapping.getString("value");
+        return requestMapping.get("value").getString();
       } else if (requestMapping.has("path")) {
-        return requestMapping.getString("path");
+        return requestMapping.get("path").getString();
       }
     }
     return "";
@@ -269,11 +269,11 @@ public class PathCollector implements Collector<PathBuilder> {
         methodSet.add("patch");
       }
 
-      String[] methods = requestMapping.getArray("method");
+      List<ReflectAnnotationValue> methods = requestMapping.get("method").getList();
       if (methods != null) {
-        for (String method : methods) {
-          if (method.startsWith("org.springframework.web.bind.annotation.RequestMethod.")) {
-            methodSet.add(method.substring("org.springframework.web.bind.annotation.RequestMethod.".length()).toLowerCase());
+        for (ReflectAnnotationValue method : methods) {
+          if (method.getString().startsWith("org.springframework.web.bind.annotation.RequestMethod.")) {
+            methodSet.add(method.getString().substring("org.springframework.web.bind.annotation.RequestMethod.".length()).toLowerCase());
           }
         }
       }
@@ -285,10 +285,10 @@ public class PathCollector implements Collector<PathBuilder> {
     Set<String> produces = new HashSet();
     if (requestMapping != null) {
       if (requestMapping.has("produces")) {
-        String[] mimes = requestMapping.getArray("produces");
+        List<ReflectAnnotationValue> mimes = requestMapping.get("produces").getList();
         if (mimes != null) {
-          for (String mime : mimes) {
-            produces.add(mime);
+          for (ReflectAnnotationValue mime : mimes) {
+            produces.add(mime.getString());
           }
         }
       }
@@ -300,10 +300,10 @@ public class PathCollector implements Collector<PathBuilder> {
     Set<String> produces = new HashSet();
     if (requestMapping != null) {
       if (requestMapping.has("consumes")) {
-        String[] mimes = requestMapping.getArray("consumes");
+        List<ReflectAnnotationValue> mimes = requestMapping.get("consumes").getList();
         if (mimes != null) {
-          for (String mime : mimes) {
-            produces.add(mime);
+          for (ReflectAnnotationValue mime : mimes) {
+            produces.add(mime.getString());
           }
         }
       }
