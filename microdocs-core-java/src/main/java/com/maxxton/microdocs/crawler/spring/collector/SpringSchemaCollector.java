@@ -7,7 +7,9 @@ import com.maxxton.microdocs.core.builder.SchemaMappingsBuilder;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.collector.SchemaParser;
 import com.maxxton.microdocs.core.domain.schema.Schema;
+import com.maxxton.microdocs.core.domain.schema.SchemaObject;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
+import com.maxxton.microdocs.core.reflect.ReflectAnnotationValue;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
 import com.maxxton.microdocs.core.reflect.ReflectDescription;
 import com.maxxton.microdocs.core.reflect.ReflectDescriptionTag;
@@ -30,6 +32,8 @@ public class SpringSchemaCollector extends SchemaCollector {
 
   private static final String JSON_PROPERTY_TYPE = "com.fasterxml.jackson.annotation.JsonProperty";
   private static final String JSON_IGNORE_TYPE = "com.fasterxml.jackson.annotation.JsonIgnore";
+  private static final String JSON_SUB_TYPES = "com.fasterxml.jackson.annotation.JsonSubTypes";
+  private static final String JSON_VIEW = "com.fasterxml.jackson.annotation.JsonView";
 
   private static final String FEIGN_PROPERTY = "com.maxxton.common.feign.FeignProperty";
   private static final String IGNORE_DOWNSTREAM_CHECK = "ignoreDownstreamCheck";
@@ -39,9 +43,27 @@ public class SpringSchemaCollector extends SchemaCollector {
   }
 
   @Override
-  protected Schema collectObjectSchema(ReflectClass<?> reflectClass, List<ReflectGenericClass> genericClasses) {
-    Schema schema = super.collectObjectSchema(reflectClass, genericClasses);
+  protected Schema collectObjectSchema(ReflectClass<?> reflectClass, List<ReflectGenericClass> genericClasses, String view) {
+    Schema schema = super.collectObjectSchema(reflectClass, genericClasses, view);
     SchemaMappingsBuilder mappingsBuilder = new SchemaMappingsBuilder();
+
+    // JSON
+    // Sub types
+    if(schema instanceof SchemaObject) {
+      SchemaObject schemaObject = (SchemaObject) schema;
+      reflectClass.getAnnotations().stream().filter(annotation -> annotation.getName().equals(JSON_SUB_TYPES)).forEach(annotation -> {
+        List<ReflectAnnotationValue> values = annotation.getList("value");
+        if (values != null) {
+          values.stream().filter(value -> value.getAnnotation() != null && value.getAnnotation().getName().equals("com.fasterxml.jackson.annotation.JsonSubTypes.Type")).forEach(value -> {
+            ReflectClass clazz = value.getAnnotation().getClazz("value");
+            if (clazz != null) {
+              Schema subSchema = collect(clazz, view);
+              schemaObject.addAnyOf(subSchema);
+            }
+          });
+        }
+      });
+    }
 
     // Check if it is an entity class
     boolean isEntity = reflectClass.getAnnotations().stream().filter(annotation -> {
@@ -55,8 +77,8 @@ public class SpringSchemaCollector extends SchemaCollector {
     if (isEntity) {
       List<String> tables = new ArrayList();
       for (String type : TABLE_TYPES) {
-        if (reflectClass.getAnnotation(type) != null && reflectClass.getAnnotation(type).get("name") != null && !reflectClass.getAnnotation(type).get("name").isEmpty()) {
-          tables.add(reflectClass.getAnnotation(type).get("name").replace("\"", "").toUpperCase());
+        if (reflectClass.getAnnotation(type) != null && reflectClass.getAnnotation(type).getString("name") != null && !reflectClass.getAnnotation(type).getString("name").isEmpty()) {
+          tables.add(reflectClass.getAnnotation(type).getString("name").replace("\"", "").toUpperCase());
         }
       }
       if (tables.isEmpty()) {
@@ -69,7 +91,7 @@ public class SpringSchemaCollector extends SchemaCollector {
   }
 
   @Override
-  protected Schema collectProperty(String name, ReflectGenericClass type, List<ReflectAnnotation> annotations, ReflectDescription docs) {
+  protected Schema collectProperty(String name, ReflectGenericClass type, List<ReflectAnnotation> annotations, ReflectDescription docs, String view) {
     Schema fieldSchema = this.collect(type);
     getDefaultValue(fieldSchema, docs);
     SchemaMappingsBuilder mappingsBuilder = new SchemaMappingsBuilder();
@@ -113,6 +135,14 @@ public class SpringSchemaCollector extends SchemaCollector {
     // Ignore
     annotations.stream().filter(annotation -> annotation.getName().equals(JSON_IGNORE_TYPE)).forEach(annotation -> {
       mappingsBuilder.jsonIgnore(true);
+    });
+    // View
+    annotations.stream().filter(annotation -> annotation.getName().equals(JSON_VIEW)).forEach(annotation -> {
+      annotation.getList("value").forEach(value -> {
+        if(value.getClazz() != null){
+          mappingsBuilder.view(value.getClazz().getName());
+        }
+      });
     });
 
     fieldSchema.setMappings(mappingsBuilder.build());

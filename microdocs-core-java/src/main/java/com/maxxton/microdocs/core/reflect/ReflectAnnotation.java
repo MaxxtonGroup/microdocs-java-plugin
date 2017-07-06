@@ -1,6 +1,7 @@
 package com.maxxton.microdocs.core.reflect;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -9,13 +10,13 @@ import java.util.Map;
 public class ReflectAnnotation extends ReflectDoc{
 
     private String packageName;
-    private Map<String, String> properties = new HashMap();
+    private Map<String, ReflectAnnotationValue> properties = new HashMap();
 
-    public Map<String, String> getProperties() {
+    public Map<String, ReflectAnnotationValue> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(Map<String, ReflectAnnotationValue> properties) {
         this.properties = properties;
     }
 
@@ -31,63 +32,71 @@ public class ReflectAnnotation extends ReflectDoc{
         return properties.containsKey(property);
     }
 
-    public String get(String property){
+    public ReflectAnnotationValue get(String property){
         return properties.get(property);
     }
 
-    public String getString(String property){
-        if(!has(property)){
-            return null;
-        }
-        String value = get(property).trim();
-        if(value.startsWith("\"") && value.endsWith("\"")){
-            return value.substring(1, value.length()-1);
+    public List<ReflectAnnotationValue> getList(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getList();
         }
         return null;
     }
 
-    public Integer getInt(String property){
-        if(getString(property) == null){
-            try{
-                return Integer.parseInt(get(property));
-            }catch(NumberFormatException e){
-                return null;
-            }
+    public ReflectAnnotationValue getChild(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getChild();
         }
         return null;
     }
 
-    public Double getDouble(String property){
-        if(getString(property) == null){
-            try{
-                return Double.parseDouble(get(property));
-            }catch(NumberFormatException e){
-                return null;
-            }
+    public Object getObject(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getObject();
         }
         return null;
     }
 
-    public boolean getBoolean(String property){
-        if(getString(property) == null){
-            try{
-                return Boolean.parseBoolean(get(property));
-            }catch(NumberFormatException e){
-                return false;
-            }
+    public String getString(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getString();
+        }
+        return null;
+    }
+
+    public Integer getInt(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getInt();
+        }
+        return null;
+    }
+
+    public Double getDouble(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getDouble();
+        }
+        return null;
+    }
+
+    public Boolean getBoolean(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getBoolean();
         }
         return false;
     }
 
-    public String[] getArray(String property){
-        if(!has(property)){
-            return null;
+    public ReflectClass getClazz(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getClazz();
         }
-        String value = get(property).trim();
-        if(value.startsWith("{") && value.endsWith("}")){
-            value = value.substring(1, value.length()-1);
-            return value.split(",");
-        }
-        return new String[]{value};
+        return null;
     }
 }

@@ -12,6 +12,7 @@ public class SchemaMapping {
     private String name;
     private boolean primary = false;
     private List<String> tables = new ArrayList();
+    private List<String> views = new ArrayList();
 
     public boolean isIgnore() {
         return ignore;
@@ -43,5 +44,13 @@ public class SchemaMapping {
 
     public void setPrimary(boolean primary) {
         this.primary = primary;
+    }
+
+    public List<String> getViews() {
+        return views;
+    }
+
+    public void setViews(List<String> views) {
+        this.views = views;
     }
 }

@@ -1,10 +1,12 @@
 package com.maxxton.microdocs.crawler.spring.collector;
 
 import com.maxxton.microdocs.core.builder.PathBuilder;
+import com.maxxton.microdocs.core.builder.SchemaMappingsBuilder;
 import com.maxxton.microdocs.core.collector.Collector;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.domain.path.*;
 import com.maxxton.microdocs.core.domain.schema.Schema;
+import com.maxxton.microdocs.core.domain.schema.SchemaObject;
 import com.maxxton.microdocs.core.domain.schema.SchemaType;
 import com.maxxton.microdocs.core.reflect.*;
 import com.maxxton.microdocs.core.logging.Logger;
@@ -26,6 +28,8 @@ public class PathCollector implements Collector<PathBuilder> {
   private static final String TYPE_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
   private static final String TYPE_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
   private static final String TYPE_PATH_VARIABLE = "org.springframework.web.bind.annotation.PathVariable";
+
+  private static final String JSON_VIEW = "com.fasterxml.jackson.annotation.JsonView";
 
   private SchemaCollector schemaCollector;
   private final String[] controllers;
@@ -179,7 +183,7 @@ public class PathCollector implements Collector<PathBuilder> {
         param.setName(name);
         param.setDescription(description);
         param.setRequired(annotation.getBoolean("required"));
-        param.setDefaultValue(annotation.getString("defaultValue"));
+        param.setDefaultValue(annotation.getObject("defaultValue"));
         param.setType(schema != null ? schema.getType() : null);
         parameters.add(param);
       } else if (parameter.hasAnnotation(TYPE_PATH_VARIABLE)) {
@@ -208,7 +212,29 @@ public class PathCollector implements Collector<PathBuilder> {
         response.setDescription(tag.getKeyword() + " " + tag.getDescription());
         break;
       }
-      Schema schema = schemaCollector.collect(method.getReturnType());
+
+      // JSON View
+      List<String> views = new ArrayList();
+      method.getAnnotations().stream().filter(annotation -> annotation.getName().equals(JSON_VIEW)).forEach(annotation -> {
+        annotation.getList("value").forEach(value -> {
+          if(value.getClazz() != null){
+            views.add(value.getClazz().getName());
+          }
+        });
+      });
+
+      Schema schema;
+      if(views.isEmpty()){
+        schema = schemaCollector.collect(method.getReturnType());
+      }else{
+        SchemaObject schemaObject = new SchemaObject();
+        schemaObject.setAnyOf(new ArrayList());
+        for(String view : views){
+          Schema subSchema = schemaCollector.collect(method.getReturnType(), view);
+          schemaObject.getAnyOf().add(subSchema);
+        }
+        schema = schemaObject;
+      }
       response.setSchema(schema);
       responses.put("default", response);
     }
@@ -243,14 +269,27 @@ public class PathCollector implements Collector<PathBuilder> {
   }
 
   private String getPath(ReflectAnnotation requestMapping) {
+    String path = "";
     if (requestMapping != null) {
       if (requestMapping.has("value")) {
-        return requestMapping.getString("value");
+        if(requestMapping.getList("value") != null){
+          for(ReflectAnnotationValue p : requestMapping.getList("value")){
+            path = p.getString();
+          }
+        }else {
+          path = requestMapping.getString("value");
+        }
       } else if (requestMapping.has("path")) {
-        return requestMapping.getString("path");
+        if(requestMapping.getList("path") != null){
+          for(ReflectAnnotationValue p : requestMapping.getList("path")){
+            path = p.getString();
+          }
+        }else {
+          path = requestMapping.getString("path");
+        }
       }
     }
-    return "";
+    return path;
   }
 
   private Set<String> getMethods(ReflectAnnotation requestMapping) {
@@ -269,11 +308,11 @@ public class PathCollector implements Collector<PathBuilder> {
         methodSet.add("patch");
       }
 
-      String[] methods = requestMapping.getArray("method");
+      List<ReflectAnnotationValue> methods = requestMapping.getList("method");
       if (methods != null) {
-        for (String method : methods) {
-          if (method.startsWith("org.springframework.web.bind.annotation.RequestMethod.")) {
-            methodSet.add(method.substring("org.springframework.web.bind.annotation.RequestMethod.".length()).toLowerCase());
+        for (ReflectAnnotationValue method : methods) {
+          if (method.getString().startsWith("org.springframework.web.bind.annotation.RequestMethod.")) {
+            methodSet.add(method.getString().substring("org.springframework.web.bind.annotation.RequestMethod.".length()).toLowerCase());
           }
         }
       }
@@ -285,10 +324,10 @@ public class PathCollector implements Collector<PathBuilder> {
     Set<String> produces = new HashSet();
     if (requestMapping != null) {
       if (requestMapping.has("produces")) {
-        String[] mimes = requestMapping.getArray("produces");
+        List<ReflectAnnotationValue> mimes = requestMapping.getList("produces");
         if (mimes != null) {
-          for (String mime : mimes) {
-            produces.add(mime);
+          for (ReflectAnnotationValue mime : mimes) {
+            produces.add(mime.getString());
           }
         }
       }
@@ -300,10 +339,10 @@ public class PathCollector implements Collector<PathBuilder> {
     Set<String> produces = new HashSet();
     if (requestMapping != null) {
       if (requestMapping.has("consumes")) {
-        String[] mimes = requestMapping.getArray("consumes");
+        List<ReflectAnnotationValue> mimes = requestMapping.getList("consumes");
         if (mimes != null) {
-          for (String mime : mimes) {
-            produces.add(mime);
+          for (ReflectAnnotationValue mime : mimes) {
+            produces.add(mime.getString());
           }
         }
       }
