@@ -2,6 +2,8 @@ package com.maxxton.microdocs.crawler.doclet;
 
 import com.maxxton.microdocs.core.reflect.*;
 import com.sun.javadoc.*;
+import com.sun.tools.javadoc.AnnotationDescImpl;
+import com.sun.tools.javadoc.AnnotationValueImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,22 +137,33 @@ public class DocletConverter {
     annotation.setPackageName(annotationDesc.annotationType().containingPackage() != null ? annotationDesc.annotationType().containingPackage().name() : null);
     for (AnnotationDesc.ElementValuePair pair : annotationDesc.elementValues()) {
       Object value = pair.value() != null ? pair.value().value() : null;
-      if (value.getClass().isArray()) {
-        for (Object item : (Object[]) value) {
-
+      if(value != null) {
+        ReflectAnnotationValue annotationValue = convertAnnotationValue(value, value.toString());
+        if(annotationValue != null) {
+          annotation.getProperties().put(pair.element().name(), annotationValue);
         }
       }
-
-
-      annotation.getProperties().put(pair.element().name(), pair.value().toString());
     }
     return annotation;
   }
 
-  private static void convertAnnotationValue(Object value) {
-    if (value instanceof List) {
-      
+  private static ReflectAnnotationValue convertAnnotationValue(Object value, String raw) {
+    if(value instanceof AnnotationValueImpl){
+      AnnotationValueImpl valueImpl = (AnnotationValueImpl) value;
+      return convertAnnotationValue(valueImpl.value(), valueImpl.toString());
+    }else if(value instanceof AnnotationDescImpl){
+      AnnotationDescImpl annotationDesc = (AnnotationDescImpl) value;
+      ReflectAnnotation annotation = convertAnnotation(annotationDesc);
+      return new ReflectAnnotationValue(raw, annotation);
+    }else if (value.getClass().isArray()) {
+      Object[] array = (Object[]) value;
+      List<ReflectAnnotationValue> list = new ArrayList();
+      for(Object item : array){
+        list.add(convertAnnotationValue(item, ""));
+      }
+      return new ReflectAnnotationValue(raw, list);
     }
+    return new ReflectAnnotationValue(raw, value);
   }
 
   private static ReflectGenericClass convertGenericClass(Type type, List<ReflectClass<ClassDoc>> classes) {

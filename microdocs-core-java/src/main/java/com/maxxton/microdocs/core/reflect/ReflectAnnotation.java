@@ -1,6 +1,7 @@
 package com.maxxton.microdocs.core.reflect;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,5 +34,61 @@ public class ReflectAnnotation extends ReflectDoc{
 
     public ReflectAnnotationValue get(String property){
         return properties.get(property);
+    }
+
+    public List<ReflectAnnotationValue> getList(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getList();
+        }
+        return null;
+    }
+
+    public ReflectAnnotationValue getChild(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getChild();
+        }
+        return null;
+    }
+
+    public Object getObject(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getObject();
+        }
+        return null;
+    }
+
+    public String getString(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getString();
+        }
+        return null;
+    }
+
+    public Integer getInt(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getInt();
+        }
+        return null;
+    }
+
+    public Double getDouble(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getDouble();
+        }
+        return null;
+    }
+
+    public Boolean getBoolean(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getBoolean();
+        }
+        return false;
     }
 }

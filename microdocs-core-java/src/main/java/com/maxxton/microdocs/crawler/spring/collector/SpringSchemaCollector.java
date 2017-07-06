@@ -7,7 +7,11 @@ import com.maxxton.microdocs.core.builder.SchemaMappingsBuilder;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.collector.SchemaParser;
 import com.maxxton.microdocs.core.domain.schema.Schema;
+import com.maxxton.microdocs.core.domain.schema.SchemaObject;
+import com.maxxton.microdocs.core.domain.schema.SchemaPrimitive;
+import com.maxxton.microdocs.core.logging.Logger;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
+import com.maxxton.microdocs.core.reflect.ReflectAnnotationValue;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
 import com.maxxton.microdocs.core.reflect.ReflectDescription;
 import com.maxxton.microdocs.core.reflect.ReflectDescriptionTag;
@@ -44,6 +48,25 @@ public class SpringSchemaCollector extends SchemaCollector {
     Schema schema = super.collectObjectSchema(reflectClass, genericClasses);
     SchemaMappingsBuilder mappingsBuilder = new SchemaMappingsBuilder();
 
+    // JSON
+    // Sub types
+    if(schema instanceof SchemaObject) {
+      SchemaObject schemaObject = (SchemaObject) schema;
+      reflectClass.getAnnotations().stream().filter(annotation -> annotation.getName().equals(JSON_SUB_TYPES)).forEach(annotation -> {
+        List<ReflectAnnotationValue> values = annotation.getList("value");
+        if (values != null) {
+          values.stream().filter(value -> value.getAnnotation() != null && value.getAnnotation().getName().equals("com.fasterxml.jackson.annotation.JsonSubTypes.Type")).forEach(value -> {
+            String className = value.getAnnotation().getString("value");
+            if (className != null) {
+              Schema subSchema = new SchemaPrimitive();
+              subSchema.setReference("#/definitions/" + className);
+              schemaObject.addAnyOf(subSchema);
+            }
+          });
+        }
+      });
+    }
+
     // Check if it is an entity class
     boolean isEntity = reflectClass.getAnnotations().stream().filter(annotation -> {
       for (String entityType : SCHEMA_TYPES) {
@@ -56,8 +79,8 @@ public class SpringSchemaCollector extends SchemaCollector {
     if (isEntity) {
       List<String> tables = new ArrayList();
       for (String type : TABLE_TYPES) {
-        if (reflectClass.getAnnotation(type) != null && reflectClass.getAnnotation(type).get("name") != null && !reflectClass.getAnnotation(type).get("name").getString().isEmpty()) {
-          tables.add(reflectClass.getAnnotation(type).get("name").getString().replace("\"", "").toUpperCase());
+        if (reflectClass.getAnnotation(type) != null && reflectClass.getAnnotation(type).getString("name") != null && !reflectClass.getAnnotation(type).getString("name").isEmpty()) {
+          tables.add(reflectClass.getAnnotation(type).getString("name").replace("\"", "").toUpperCase());
         }
       }
       if (tables.isEmpty()) {
@@ -83,16 +106,16 @@ public class SpringSchemaCollector extends SchemaCollector {
     }
     // Property name
     annotations.stream().filter(annotation -> annotation.getName().equals(FEIGN_PROPERTY)).forEach(annotation -> {
-      if (annotation.get("value").getString() != null && !annotation.get("value").getString().isEmpty() && !name.equals(annotation.get("value").getString())) {
-        mappingsBuilder.clientName(annotation.get("value").getString().replace("\"", ""));
+      if (annotation.getString("value") != null && !annotation.getString("value").isEmpty() && !name.equals(annotation.getString("value"))) {
+        mappingsBuilder.clientName(annotation.getString("value").replace("\"", ""));
       }
     });
 
     // RELATIONAL
     // Column name
     annotations.stream().filter(annotation -> annotation.getName().equals(COLUMN_TYPE)).forEach(annotation -> {
-      if (annotation.get("name").getString() != null && !annotation.get("name").getString().isEmpty() && !name.equals(annotation.get("name").getString())) {
-        mappingsBuilder.relationalName(annotation.get("name").getString().replace("\"", ""));
+      if (annotation.getString("name") != null && !annotation.getString("name").isEmpty() && !name.equals(annotation.getString("name"))) {
+        mappingsBuilder.relationalName(annotation.getString("name").replace("\"", ""));
       }
     });
     // Ignore
@@ -107,8 +130,8 @@ public class SpringSchemaCollector extends SchemaCollector {
     // JSON
     // Property
     annotations.stream().filter(annotation -> annotation.getName().equals(JSON_PROPERTY_TYPE)).forEach(annotation -> {
-      if (annotation.get("value").getString() != null && !annotation.get("value").getString().isEmpty() && !name.equals(annotation.get("value").getString())) {
-        mappingsBuilder.jsonName(annotation.get("value").getString().replace("\"", ""));
+      if (annotation.getString("value") != null && !annotation.getString("value").isEmpty() && !name.equals(annotation.getString("value"))) {
+        mappingsBuilder.jsonName(annotation.getString("value").replace("\"", ""));
       }
     });
     // Ignore

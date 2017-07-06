@@ -63,7 +63,7 @@ public class ComponentCollector implements Collector<ComponentBuilder> {
                 reflectClass.getAnnotations().forEach(compAnnotation -> {
                     AnnotationBuilder annotationBuilder = new AnnotationBuilder();
                     annotationBuilder.name(compAnnotation.getSimpleName());
-                    compAnnotation.getProperties().entrySet().forEach(entry -> annotationBuilder.property(entry.getKey(), entry.getValue()));
+                    compAnnotation.getProperties().entrySet().forEach(entry -> annotationBuilder.property(entry.getKey(), entry.getValue().toString()));
                     componentBuilder.annotation(annotationBuilder);
                 });
                 //todo: check dependencies
