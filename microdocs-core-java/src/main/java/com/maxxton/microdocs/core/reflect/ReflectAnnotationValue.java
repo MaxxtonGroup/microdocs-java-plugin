@@ -7,6 +7,7 @@ import java.util.List;
  */
 public class ReflectAnnotationValue {
 
+  private ReflectClass clazz;
   private ReflectAnnotation annotation;
   private List<ReflectAnnotationValue> list;
   private ReflectAnnotationValue child;
@@ -26,6 +27,11 @@ public class ReflectAnnotationValue {
   public ReflectAnnotationValue(String rawString, ReflectAnnotation annotation){
     this.rawString = rawString;
     this.annotation = annotation;
+  }
+
+  public ReflectAnnotationValue(String rawString, ReflectClass clazz){
+    this.rawString = rawString;
+    this.clazz = clazz;
   }
 
   public ReflectAnnotationValue(String rawString, Object object){
@@ -75,5 +81,9 @@ public class ReflectAnnotationValue {
       return (Boolean) this.object;
     }
     return false;
+  }
+
+  public ReflectClass getClazz() {
+    return clazz;
   }
 }

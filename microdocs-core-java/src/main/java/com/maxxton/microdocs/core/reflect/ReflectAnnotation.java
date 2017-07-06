@@ -91,4 +91,12 @@ public class ReflectAnnotation extends ReflectDoc{
         }
         return false;
     }
+
+    public ReflectClass getClazz(String property) {
+        ReflectAnnotationValue value = get(property);
+        if(value != null){
+            return value.getClazz();
+        }
+        return null;
+    }
 }

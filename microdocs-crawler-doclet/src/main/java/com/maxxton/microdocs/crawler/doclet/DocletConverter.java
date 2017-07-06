@@ -4,6 +4,7 @@ import com.maxxton.microdocs.core.reflect.*;
 import com.sun.javadoc.*;
 import com.sun.tools.javadoc.AnnotationDescImpl;
 import com.sun.tools.javadoc.AnnotationValueImpl;
+import com.sun.tools.javadoc.ClassDocImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,6 +156,9 @@ public class DocletConverter {
       AnnotationDescImpl annotationDesc = (AnnotationDescImpl) value;
       ReflectAnnotation annotation = convertAnnotation(annotationDesc);
       return new ReflectAnnotationValue(raw, annotation);
+    }else if(value instanceof ClassDoc){
+      ReflectClass<ClassDoc> clazz = convertClass((ClassDoc)value);
+      return new ReflectAnnotationValue(raw, clazz);
     }else if (value.getClass().isArray()) {
       Object[] array = (Object[]) value;
       List<ReflectAnnotationValue> list = new ArrayList();

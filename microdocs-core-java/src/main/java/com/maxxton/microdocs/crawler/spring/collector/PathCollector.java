@@ -1,10 +1,12 @@
 package com.maxxton.microdocs.crawler.spring.collector;
 
 import com.maxxton.microdocs.core.builder.PathBuilder;
+import com.maxxton.microdocs.core.builder.SchemaMappingsBuilder;
 import com.maxxton.microdocs.core.collector.Collector;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.domain.path.*;
 import com.maxxton.microdocs.core.domain.schema.Schema;
+import com.maxxton.microdocs.core.domain.schema.SchemaObject;
 import com.maxxton.microdocs.core.domain.schema.SchemaType;
 import com.maxxton.microdocs.core.reflect.*;
 import com.maxxton.microdocs.core.logging.Logger;
@@ -26,6 +28,8 @@ public class PathCollector implements Collector<PathBuilder> {
   private static final String TYPE_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
   private static final String TYPE_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
   private static final String TYPE_PATH_VARIABLE = "org.springframework.web.bind.annotation.PathVariable";
+
+  private static final String JSON_VIEW = "com.fasterxml.jackson.annotation.JsonView";
 
   private SchemaCollector schemaCollector;
   private final String[] controllers;
@@ -208,7 +212,29 @@ public class PathCollector implements Collector<PathBuilder> {
         response.setDescription(tag.getKeyword() + " " + tag.getDescription());
         break;
       }
-      Schema schema = schemaCollector.collect(method.getReturnType());
+
+      // JSON View
+      List<String> views = new ArrayList();
+      method.getAnnotations().stream().filter(annotation -> annotation.getName().equals(JSON_VIEW)).forEach(annotation -> {
+        annotation.getList("value").forEach(value -> {
+          if(value.getClazz() != null){
+            views.add(value.getClazz().getName());
+          }
+        });
+      });
+
+      Schema schema;
+      if(views.isEmpty()){
+        schema = schemaCollector.collect(method.getReturnType());
+      }else{
+        SchemaObject schemaObject = new SchemaObject();
+        schemaObject.setAnyOf(new ArrayList());
+        for(String view : views){
+          Schema subSchema = schemaCollector.collect(method.getReturnType(), view);
+          schemaObject.getAnyOf().add(subSchema);
+        }
+        schema = schemaObject;
+      }
       response.setSchema(schema);
       responses.put("default", response);
     }
