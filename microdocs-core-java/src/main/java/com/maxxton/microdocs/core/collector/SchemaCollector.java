@@ -36,6 +36,7 @@ import com.maxxton.microdocs.core.reflect.ReflectGenericClass;
 public class SchemaCollector {
 
   private Map<String, Schema> schemas = new HashMap();
+  protected Map<String, String> postViews = new HashMap();
 
   private final String[] annotations;
   private final SchemaParser[] schemaParsers;
@@ -52,6 +53,13 @@ public class SchemaCollector {
 
     // collect schemas of their models
     models.entrySet().forEach(entry -> schemas.put(getSchemaName(entry.getValue(), null), collectSchema(entry.getValue(), new ArrayList(), null)));
+
+    // collect postViews
+    postViews.forEach((className, view) -> {
+      ReflectClass matchClass = classes.stream().filter(clazz -> clazz.getName().equals(className)).findFirst().orElse(null);
+      collect(matchClass, view);
+    });
+
     return schemas.entrySet().stream().filter(entry -> !entry.getValue().getType().equals(SchemaType.DUMMY)).collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
   }
 

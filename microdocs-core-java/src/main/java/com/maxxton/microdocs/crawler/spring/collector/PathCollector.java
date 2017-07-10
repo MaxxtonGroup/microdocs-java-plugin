@@ -226,6 +226,8 @@ public class PathCollector implements Collector<PathBuilder> {
       Schema schema;
       if(views.isEmpty()){
         schema = schemaCollector.collect(method.getReturnType());
+      }else if(views.size() == 1){
+        schema = schemaCollector.collect(method.getReturnType(), views.get(0));
       }else{
         SchemaObject schemaObject = new SchemaObject();
         schemaObject.setAnyOf(new ArrayList());

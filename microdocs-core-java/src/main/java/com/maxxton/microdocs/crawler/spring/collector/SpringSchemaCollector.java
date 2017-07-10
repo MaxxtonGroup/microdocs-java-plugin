@@ -8,6 +8,7 @@ import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.collector.SchemaParser;
 import com.maxxton.microdocs.core.domain.schema.Schema;
 import com.maxxton.microdocs.core.domain.schema.SchemaObject;
+import com.maxxton.microdocs.core.domain.schema.SchemaPrimitive;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotationValue;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
@@ -57,8 +58,10 @@ public class SpringSchemaCollector extends SchemaCollector {
           values.stream().filter(value -> value.getAnnotation() != null && value.getAnnotation().getName().equals("com.fasterxml.jackson.annotation.JsonSubTypes.Type")).forEach(value -> {
             ReflectClass clazz = value.getAnnotation().getClazz("value");
             if (clazz != null) {
-              Schema subSchema = collect(clazz, view);
-              schemaObject.addAnyOf(subSchema);
+              postViews.put(clazz.getName(), view);
+              SchemaObject schemaRef = new SchemaObject();
+              schemaRef.setReference("#/definitions/" + getSchemaName(clazz, view));
+              schemaObject.addAnyOf(schemaRef);
             }
           });
         }
