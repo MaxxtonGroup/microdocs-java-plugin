@@ -49,15 +49,21 @@ gradle publishArchives
 1. Create a [sonatype account](https://issues.sonatype.org/secure/Signup!default.jspa) and create an issue to request access to com.maxxton
 2. Install [GnuPG](https://www.gnupg.org/download/)
 3. Generate key pair by running:
+```bash
+$ gpg --full-generate-key
 ```
-$ gpg --gen-key
+4, Export the key
+```bash
+gpg --export-secret-keys -o ~/.gnupg/secring.gpg
 ```
-choose RSA 2048bit with no expiration.
-Your key is saved in ~/.gnupg
-4. Create ```gradle.properties``` in the gradle home folder (~/.gradle)
+5, Publish key
+```bash
+gpg --keyserver hkp://pool.sk-keyservers.net --send-keys {publickeyId}
+```
+6. Create ```gradle.properties``` in the gradle home folder (~/.gradle)
 ~/.gradle/gradle.properties
 ```
-signing.keyId=publickeyid
+signing.keyId=publickeyid (only the last 8 chars)
 signing.password=yourpassword
 signing.secretKeyRingFile=C:\\Users\\username\\.gnupg\\secring.gpg
 
@@ -66,7 +72,7 @@ sonatypePassword=password
 ```
 Fill in these properties correctly.
 
-5. Publish
+7. Publish
 ```
 $ gradle publishArchives
 ```

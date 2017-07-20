@@ -21,12 +21,11 @@ dependencies {
     compile gradleApi()
     compile ("com.fasterxml.jackson.core:jackson-databind:2.7.5")
     compile ("com.mashape.unirest:unirest-java:1.4.9")
-    compile ("org.codehaus.groovy:groovy-all:2.4.4")
     compile ("com.maxxton:microdocs-core-java:1.7.1")
 }
 
 group='com.maxxton'
-version = '1.9.1'
+version = '1.9.2'
 
 task fatJar(type: Jar, dependsOn: 'jar') {
     baseName = project.name
