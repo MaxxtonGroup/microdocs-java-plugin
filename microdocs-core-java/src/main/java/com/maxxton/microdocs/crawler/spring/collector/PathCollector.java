@@ -1,7 +1,6 @@
 package com.maxxton.microdocs.crawler.spring.collector;
 
 import com.maxxton.microdocs.core.builder.PathBuilder;
-import com.maxxton.microdocs.core.builder.SchemaMappingsBuilder;
 import com.maxxton.microdocs.core.collector.Collector;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.domain.path.*;
@@ -15,6 +14,7 @@ import com.maxxton.microdocs.crawler.spring.parser.PageableParser;
 import com.maxxton.microdocs.crawler.spring.parser.SpecificationsParser;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -112,6 +112,11 @@ public class PathCollector implements Collector<PathBuilder> {
       path = fullPath;
     }
 
+    // Ignore regex in path parameters
+    path = path.replaceAll("\\{.*?(\\:.*?)\\}", "");
+    String finalPath = path;
+
+
     // find methods
     Set<String> methods = new HashSet();
     methods.addAll(getMethods(controllerRequestMapping));
@@ -120,7 +125,7 @@ public class PathCollector implements Collector<PathBuilder> {
       methods.add("get");
     }
     methods.forEach(requestMethod -> {
-      Logger.get().logEndpoint(requestMethod, path);
+      Logger.get().logEndpoint(requestMethod, finalPath);
     });
 
     Set<String> produces = new HashSet();
