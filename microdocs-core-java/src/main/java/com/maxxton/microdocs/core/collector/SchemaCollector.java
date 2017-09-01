@@ -192,7 +192,9 @@ public class SchemaCollector {
     schemas.put(getSchemaName(reflectClass, view), dummy);
 
     SchemaObject schema = new SchemaObject();
-    schema.setDescription(reflectClass.getDescription().getText());
+    if(reflectClass.getDescription() != null) {
+      schema.setDescription(reflectClass.getDescription().getText());
+    }
     schema.setType(SchemaType.OBJECT);
     schema.setName(reflectClass.getSimpleName());
     schema.setGeneric(collectGeneric(genericClasses));
