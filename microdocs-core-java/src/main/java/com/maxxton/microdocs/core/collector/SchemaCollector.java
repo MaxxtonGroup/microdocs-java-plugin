@@ -55,10 +55,14 @@ public class SchemaCollector {
     models.entrySet().forEach(entry -> schemas.put(getSchemaName(entry.getValue(), null), collectSchema(entry.getValue(), new ArrayList(), null)));
 
     // collect postViews
-    postViews.forEach((className, view) -> {
+    List<Map.Entry<String, String>> entrySet = postViews.entrySet().stream().collect(Collectors.toList());
+    for (int i = 0; i < entrySet.size(); i++) {
+      Map.Entry<String, String> entry = entrySet.get(i);
+      String className = entry.getKey();
+      String view = entry.getValue();
       ReflectClass matchClass = classes.stream().filter(clazz -> clazz.getName().equals(className)).findFirst().orElse(null);
       collect(matchClass, view);
-    });
+    }
 
     return schemas.entrySet().stream().filter(entry -> !entry.getValue().getType().equals(SchemaType.DUMMY)).collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
   }
@@ -87,8 +91,7 @@ public class SchemaCollector {
   public Schema collect(ReflectGenericClass reflectGenericClass, String view) {
     if (reflectGenericClass.getGenericTypes().isEmpty()) {
       return collect(reflectGenericClass.getClassType(), view);
-    }
-    else {
+    } else {
       // don't define schemas globally when they have generic types
       return collectSchema(reflectGenericClass.getClassType(), reflectGenericClass.getGenericTypes(), view);
     }
@@ -104,32 +107,25 @@ public class SchemaCollector {
 
     if (reflectClass.getType() == ClassType.ENUM) {
       return collectEnumSchema(reflectClass);
-    }
-    else {
+    } else {
       if (reflectClass.getName().equals(Integer.class.getCanonicalName()) || reflectClass.getName().equals(Integer.TYPE.getCanonicalName()) || reflectClass.getName()
           .equals(Byte.class.getCanonicalName()) || reflectClass.getName().equals(Byte.TYPE.getCanonicalName()) || reflectClass.getName().equals(Short.class.getCanonicalName()) || reflectClass
           .getName().equals(Short.TYPE.getCanonicalName()) || reflectClass.getName().equals(Long.class.getCanonicalName()) || reflectClass.getName().equals(Long.TYPE.getCanonicalName())
           || reflectClass.getName().equals(Character.class.getCanonicalName()) || reflectClass.getName().equals(Character.TYPE.getCanonicalName())) {
         return collectIntegerSchema(reflectClass);
-      }
-      else if (reflectClass.getName().equals(Float.class.getCanonicalName()) || reflectClass.getName().equals(Float.TYPE.getCanonicalName()) || reflectClass.getName()
+      } else if (reflectClass.getName().equals(Float.class.getCanonicalName()) || reflectClass.getName().equals(Float.TYPE.getCanonicalName()) || reflectClass.getName()
           .equals(Double.class.getCanonicalName()) || reflectClass.getName().equals(Double.TYPE.getCanonicalName())) {
         return collectNumberSchema(reflectClass);
-      }
-      else if (reflectClass.getName().equals(String.class.getCanonicalName())) {
+      } else if (reflectClass.getName().equals(String.class.getCanonicalName())) {
         return collectStringSchema(reflectClass);
-      }
-      else if (reflectClass.getName().equals(Boolean.class.getCanonicalName()) || reflectClass.getName().equals(Boolean.TYPE.getCanonicalName())) {
+      } else if (reflectClass.getName().equals(Boolean.class.getCanonicalName()) || reflectClass.getName().equals(Boolean.TYPE.getCanonicalName())) {
         return collectBooleanSchema(reflectClass);
-      }
-      else if (reflectClass.getName().equals(Date.class.getCanonicalName()) || reflectClass.getName().equals(LocalDate.class.getCanonicalName()) || reflectClass.getName()
+      } else if (reflectClass.getName().equals(Date.class.getCanonicalName()) || reflectClass.getName().equals(LocalDate.class.getCanonicalName()) || reflectClass.getName()
           .equals(LocalDateTime.class.getCanonicalName())) {
         return collectDateSchema(reflectClass);
-      }
-      else if (reflectClass.hasParent(List.class.getCanonicalName(), Iterator.class.getCanonicalName(), Set.class.getCanonicalName())) {
+      } else if (reflectClass.hasParent(List.class.getCanonicalName(), Iterator.class.getCanonicalName(), Set.class.getCanonicalName())) {
         return collectArraySchema(reflectClass, genericClasses, view);
-      }
-      else {
+      } else {
         return collectObjectSchema(reflectClass, genericClasses, view);
       }
     }
@@ -192,7 +188,7 @@ public class SchemaCollector {
     schemas.put(getSchemaName(reflectClass, view), dummy);
 
     SchemaObject schema = new SchemaObject();
-    if(reflectClass.getDescription() != null) {
+    if (reflectClass.getDescription() != null) {
       schema.setDescription(reflectClass.getDescription().getText());
     }
     schema.setType(SchemaType.OBJECT);
@@ -212,16 +208,14 @@ public class SchemaCollector {
             if (!method.getParameters().isEmpty()) {
               type = method.getParameters().get(0).getType();
             }
-          }
-          else {
+          } else {
             type = method.getReturnType();
           }
 
           PropertyBucket bucket;
           if (propertyBuckets.containsKey(propertyName)) {
             bucket = propertyBuckets.get(propertyName);
-          }
-          else {
+          } else {
             bucket = new PropertyBucket();
             propertyBuckets.put(propertyName, bucket);
           }
@@ -290,37 +284,32 @@ public class SchemaCollector {
         try {
           if (fieldSchema.getType() == SchemaType.BOOLEAN) {
             fieldSchema.setDefaultValue(Boolean.parseBoolean(tag.getContent()));
-          }
-          else if (fieldSchema.getType() == SchemaType.INTEGER) {
+          } else if (fieldSchema.getType() == SchemaType.INTEGER) {
             fieldSchema.setDefaultValue(Integer.parseInt(tag.getContent()));
-          }
-          else if (fieldSchema.getType() == SchemaType.NUMBER) {
+          } else if (fieldSchema.getType() == SchemaType.NUMBER) {
             fieldSchema.setDefaultValue(Float.parseFloat(tag.getContent()));
-          }
-          else if (fieldSchema.getType() == SchemaType.DATE) {
+          } else if (fieldSchema.getType() == SchemaType.DATE) {
+            fieldSchema.setDefaultValue(tag.getContent());
+          } else if (fieldSchema.getType() == SchemaType.STRING) {
             fieldSchema.setDefaultValue(tag.getContent());
           }
-          else if (fieldSchema.getType() == SchemaType.STRING) {
-            fieldSchema.setDefaultValue(tag.getContent());
-          }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
         }
       });
     }
   }
 
   protected boolean matchView(Schema schema, String view) {
-    if(view == null){
+    if (view == null) {
       return true;
     }
-    if(schema.getMappings() != null && schema.getMappings().getJson() != null && schema.getMappings().getJson().getViews() != null){
+    if (schema.getMappings() != null && schema.getMappings().getJson() != null && schema.getMappings().getJson().getViews() != null) {
       return schema.getMappings().getJson().getViews().contains(view);
     }
     return true;
   }
 
-  protected String getSchemaName(ReflectClass reflectClass, String view){
+  protected String getSchemaName(ReflectClass reflectClass, String view) {
     return reflectClass.getName() + (view != null ? "#" + view : "");
   }
 
