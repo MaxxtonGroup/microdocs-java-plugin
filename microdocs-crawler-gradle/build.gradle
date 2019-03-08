@@ -25,7 +25,7 @@ dependencies {
 }
 
 group='com.maxxton'
-version = '1.9.5'
+version = '1.9.7'
 
 task fatJar(type: Jar, dependsOn: 'jar') {
     baseName = project.name
