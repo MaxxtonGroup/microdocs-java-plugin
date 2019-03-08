@@ -12,7 +12,7 @@ public enum Types {
   REPOSITORY("org.springframework.stereotype.Repository"),
   SPRING_BOOT_APPLICATION("org.springframework.boot.autoconfigure.SpringBootApplication"),
   CONFIGURATION("org.springframework.context.annotation.Configuration"),
-  FEIGN_CLIENT("org.springframework.cloud.netflix.feign.FeignClient"),
+  FEIGN_CLIENT("org.springframework.cloud.openfeign.FeignClient"),
 
 
   REQUEST_MAPPING("org.springframework.web.bind.annotation.RequestMapping"),
