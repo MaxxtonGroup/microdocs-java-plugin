@@ -20,7 +20,7 @@ public class SpecificationsParser implements RequestParser {
 
     @Override
     public String getClassName() {
-        return "org.springframework.data.jpa.domain_old.Specifications";
+        return "org.springframework.data.jpa.domain.Specifications";
     }
 
     @Override
