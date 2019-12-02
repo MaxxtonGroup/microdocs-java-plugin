@@ -1,5 +1,10 @@
 package com.maxxton.microdocs.publisher;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.mashape.unirest.http.HttpResponse;
@@ -11,11 +16,6 @@ import com.mashape.unirest.request.HttpRequestWithBody;
 import com.maxxton.microdocs.core.domain.check.CheckProblem;
 import com.maxxton.microdocs.core.domain.check.CheckResponse;
 import com.maxxton.microdocs.core.logging.Logger;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * Publish or check reports to the MicroDocs server
@@ -165,11 +165,11 @@ public class MicroDocsPublisher {
     if(errorCount + warningCount + noticeCount > 0){
       message += "Project contains problems: ";
       if(errorCount > 0)
-        message += String.valueOf(errorCount) + " error" + (errorCount > 1 ? "s" : "") + ",";
+        message += errorCount + " error" + (errorCount > 1 ? "s" : "") + ",";
       if(warningCount > 0)
-        message += String.valueOf(warningCount) + " warning" + (warningCount > 1 ? "s" : "") + ",";
+        message += warningCount + " warning" + (warningCount > 1 ? "s" : "") + ",";
       if(noticeCount > 0)
-        message += String.valueOf(noticeCount) + " notice" + (noticeCount > 1 ? "s" : "") + ",";
+        message += noticeCount + " notice" + (noticeCount > 1 ? "s" : "") + ",";
       if(message.endsWith(","))
         message = message.substring(0, message.length()-1);
     }else{
@@ -184,11 +184,11 @@ public class MicroDocsPublisher {
     if(response.getProblems() != null) {
       for (CheckProblem problem : response.getProblems()) {
         String msg = "\n";
-        String lineNumber = problem.getLineNumber() > 0 ? ":" + String.valueOf(problem.getLineNumber()) : "";
+        String lineNumber = problem.getLineNumber() > 0 ? ":" + problem.getLineNumber() : "";
         String sourceFile = new File(rootDir, "src/main/java/" + problem.getPath() + lineNumber).getPath();
         msg += sourceFile + ": " + problem.getLevel() + ": " + problem.getMessage();
         if(problem.getClient() != null){
-          msg += "\nBreaking change detected with " + problem.getClient().getTitle() + " (source: " + problem.getClient().getSourceLink() != null ? problem.getClient().getSourceLink() : problem.getClient().getClassName() + " )";
+          msg += problem.getClient().getSourceLink();
         }
         if(hasProblems) {
           Logger.get().error(msg);

@@ -1,8 +1,5 @@
 package com.maxxton.microdocs.crawler.doclet;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Command line configurations for JavaDoc
  *
@@ -10,85 +7,69 @@ import java.util.Map;
  */
 public class Configuration {
 
-  private static final String OPTION_DIRECTORY = "-d";
-  private static final String OPTION_FILENAME = "-f";
-  private static final String OPTION_LINKPATH = "-linkpath";
-  private static final String OPTION_CRAWLER = "-crawler";
-  private static final String OPTION_VERSION = "-version";
-  private static final String OPTION_GROUP = "-group";
-  private static final String OPTION_PROJECT_NAME = "-projectName";
+  public static final String OPTION_DIRECTORY = "-d";
+  public static final String OPTION_FILENAME = "-f";
+  public static final String OPTION_CRAWLER = "-crawler";
+  public static final String OPTION_VERSION = "-version";
+  public static final String OPTION_GROUP = "-group";
+  public static final String OPTION_PROJECT_NAME = "-projectName";
   private static final String DEFAULT_DIRECTORY = ".";
   private static final String DEFAULT_FILENAME = "./microdocs.json";
-  private static final String DEFAULT_LINKPATH = "./";
   private static final String DEFAULT_CRAWLER = "spring";
 
-  // List of ignored options
-  // TODO: Implement support for these since they are considered standard options
-  private static final Map<String, Integer> IGNORED_OPTIONS = new HashMap();
+  private String outputDirectory;
+  private String outputFilename;
+  private String crawler;
+  private String version;
+  private String group;
+  private String projectName;
 
-  static {
-    IGNORED_OPTIONS.put("-doctitle", 2);
-    IGNORED_OPTIONS.put("-windowtitle", 2);
+  public void setOutputDirectory(String outputDirectory) {
+    this.outputDirectory = outputDirectory;
   }
 
-  public String[][] options;
-
-  public String getOutputDirectory() {
-    return getOption(OPTION_DIRECTORY) != null ? getOption(OPTION_DIRECTORY) : DEFAULT_DIRECTORY;
+  public void setOutputFilename(String outputFilename) {
+    this.outputFilename = outputFilename;
   }
 
-  public String getOutputFileName() {
-    return getOption(OPTION_FILENAME) != null ? getOption(OPTION_FILENAME) : DEFAULT_FILENAME;
+  public void setCrawler(String crawler) {
+    this.crawler = crawler;
   }
 
-  public String getCrawler() {
-    return getOption(OPTION_CRAWLER) != null ? getOption(OPTION_CRAWLER) : DEFAULT_CRAWLER;
+  public void setVersion(String version) {
+    this.version = version;
   }
 
-  public String getVersion() {
-    return getOption(OPTION_VERSION) != null ? getOption(OPTION_VERSION) : null;
+  public void setGroup(String group) {
+    this.group = group;
   }
 
-  public String getGroup() {
-    return getOption(OPTION_GROUP) != null ? getOption(OPTION_GROUP) : null;
+  public void setProjectName(String projectName) {
+    this.projectName = projectName;
   }
 
-  public String getProjectName() {
-    return getOption(OPTION_PROJECT_NAME) != null ? getOption(OPTION_PROJECT_NAME) : null;
+  String getOutputDirectory() {
+    return outputDirectory != null ? outputDirectory : DEFAULT_DIRECTORY;
   }
 
-  private String getOption(String optionName) {
-    for (String[] option : options) {
-      if (option[0].equals(optionName)) {
-        String result = option[1];
-        if (result.startsWith("'")) {
-          result = result.substring(1);
-        }
-        if (result.endsWith("'")) {
-          result = result.substring(0, result.length() - 1);
-        }
-        return result;
-      }
-    }
-    return null;
+  String getOutputFileName() {
+    return outputFilename != null ? outputFilename : DEFAULT_FILENAME;
   }
 
-  public int getOptionLength(String option) {
-    switch (option) {
-      case OPTION_DIRECTORY:
-      case OPTION_FILENAME:
-      case OPTION_LINKPATH:
-      case OPTION_CRAWLER:
-      case OPTION_VERSION:
-      case OPTION_GROUP:
-      case OPTION_PROJECT_NAME:
-        return 2;
-      default:
-        if (IGNORED_OPTIONS.containsKey(option)) {
-          return IGNORED_OPTIONS.get(option);
-        } else {
-          return 0;
-        }
-    }
+  String getCrawler() {
+    return crawler != null ? crawler : DEFAULT_CRAWLER;
   }
+
+  String getVersion() {
+    return version;
+  }
+
+  String getGroup() {
+    return group;
+  }
+
+  String getProjectName() {
+    return projectName;
+  }
+
 }

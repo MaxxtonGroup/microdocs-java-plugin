@@ -1,15 +1,30 @@
 package com.maxxton.microdocs.crawler.doclet;
 
-import com.maxxton.microdocs.core.reflect.*;
-import com.sun.javadoc.*;
-import com.sun.tools.javadoc.AnnotationDescImpl;
-import com.sun.tools.javadoc.AnnotationValueImpl;
-import com.sun.tools.javadoc.ClassDocImpl;
-
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
+
+import com.maxxton.microdocs.core.reflect.ClassType;
+import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
+import com.maxxton.microdocs.core.reflect.ReflectAnnotationValue;
+import com.maxxton.microdocs.core.reflect.ReflectClass;
+import com.maxxton.microdocs.core.reflect.ReflectDescription;
+import com.maxxton.microdocs.core.reflect.ReflectDescriptionTag;
+import com.maxxton.microdocs.core.reflect.ReflectField;
+import com.maxxton.microdocs.core.reflect.ReflectGenericClass;
+import com.maxxton.microdocs.core.reflect.ReflectMethod;
+import com.maxxton.microdocs.core.reflect.ReflectParameter;
+import com.sun.source.doctree.DocTree;
 
 /**
  * Convert Doclet classes to Reflect classes
@@ -24,43 +39,41 @@ public class DocletConverter {
    * @param classDocs list of ClassDocs
    * @return List of ReflectClasses
    */
-  public static List<ReflectClass<?>> convert(ClassDoc... classDocs) {
-    List<ClassDoc> classes = new ArrayList();
-    for (ClassDoc classDoc : classDocs) {
-      classes.add(classDoc);
-    }
+  public static List<ReflectClass<?>> convert(TypeElement... classDocs) {
+    List<TypeElement> classes = new ArrayList<>();
+    Collections.addAll(classes, classDocs);
     return convert(classes);
   }
 
   /**
    * Converts com.sun.javadoc.ClassDoc to ReflectClasses
    *
-   * @param classDocs list of ClassDocs
+   * @param typeElements list of ClassDocs
    * @return List of ReflectClasses
    */
-  public static List<ReflectClass<?>> convert(List<ClassDoc> classDocs) {
-    List<ReflectClass<ClassDoc>> reflectClasses = new ArrayList();
-    classDocs.forEach(classDoc -> reflectClasses.add(convertClass(classDoc)));
+  public static List<ReflectClass<?>> convert(List<TypeElement> typeElements) {
+    List<ReflectClass<TypeElement>> reflectClasses = new ArrayList<>();
+    typeElements.forEach(typeElement -> reflectClasses.add(convertClass(typeElement)));
     reflectClasses.forEach(reflectClass -> updateClass(reflectClass, reflectClasses));
-    return reflectClasses.stream().collect(Collectors.toList());
+    return new ArrayList<>(reflectClasses);
   }
 
-  private static void updateClass(ReflectClass<ClassDoc> reflectClass, List<ReflectClass<ClassDoc>> reflectClasses) {
-    ClassDoc classDoc = reflectClass.getOriginal();
+  private static void updateClass(ReflectClass<TypeElement> reflectClass, List<ReflectClass<TypeElement>> reflectClasses) {
+    TypeElement originalTypeElement = reflectClass.getOriginal();
     // find super class
-    if (classDoc.superclassType() != null) {
-      reflectClass.setSuperClass(convertGenericClass(classDoc.superclassType(), reflectClasses));
+    if (originalTypeElement.getSuperclass() != null) {
+      reflectClass.setSuperClass(convertGenericClass(originalTypeElement.getSuperclass(), reflectClasses));
     }
     // find interfaces
-    for (Type interfaceType : classDoc.interfaceTypes()) {
+    for (TypeMirror interfaceType : originalTypeElement.getInterfaces()) {
       reflectClass.getInterfaces().add(convertGenericClass(interfaceType, reflectClasses));
     }
     //find annotations
-    for (AnnotationDesc annotationDesc : classDoc.annotations()) {
+    for (AnnotationMirror annotationDesc : originalTypeElement.getAnnotationMirrors()) {
       reflectClass.getAnnotations().add(convertAnnotation(annotationDesc));
     }
     //find fields
-    for (FieldDoc fieldDoc : classDoc.fields(false)) {
+    for (VariableElement fieldDoc : originalTypeElement.fields(false)) {
       ReflectField field = convertField(fieldDoc, reflectClasses);
       if (field.isStatic()) {
         reflectClass.getClassFields().add(field);
@@ -69,12 +82,12 @@ public class DocletConverter {
       }
     }
     //find enum
-    for (FieldDoc fieldDoc : classDoc.enumConstants()) {
+    for (VariableElement fieldDoc : originalTypeElement.enumConstants()) {
       ReflectField constant = convertField(fieldDoc, reflectClasses);
       reflectClass.getEnumFields().add(constant);
     }
     //find methods
-    for (MethodDoc methodDoc : classDoc.methods(false)) {
+    for (ExecutableElement methodDoc : originalTypeElement.methods(false)) {
       ReflectMethod method = convertMethod(methodDoc, reflectClasses);
       if (method.isStatic()) {
         reflectClass.getClassMethods().add(method);
@@ -84,7 +97,7 @@ public class DocletConverter {
     }
   }
 
-  private static ReflectMethod convertMethod(MethodDoc methodDoc, List<ReflectClass<ClassDoc>> reflectClasses) {
+  private static ReflectMethod convertMethod(Element methodDoc, List<ReflectClass<TypeElement>> reflectClasses) {
     ReflectMethod method = new ReflectMethod();
     method.setSimpleName(methodDoc.name());
     method.setName(methodDoc.qualifiedName());
@@ -94,28 +107,28 @@ public class DocletConverter {
     method.setReturnType(convertGenericClass(methodDoc.returnType(), reflectClasses));
     method.setLineNumber(methodDoc.position().line());
     //find parameters
-    for (Parameter parameter : methodDoc.parameters()) {
+    for (VariableElement parameter : methodDoc.parameters()) {
       method.getParameters().add(convertParameter(parameter, reflectClasses));
     }
     //find annotations
-    for (AnnotationDesc annotationDesc : methodDoc.annotations()) {
+    for (AnnotationMirror annotationDesc : methodDoc.annotations()) {
       method.getAnnotations().add(convertAnnotation(annotationDesc));
     }
     return method;
   }
 
-  private static ReflectParameter convertParameter(Parameter parameter, List<ReflectClass<ClassDoc>> reflectClasses) {
+  private static ReflectParameter convertParameter(VariableElement parameter, List<ReflectClass<TypeElement>> reflectClasses) {
     ReflectParameter reflectParameter = new ReflectParameter();
     reflectParameter.setName(parameter.name());
     reflectParameter.setType(convertGenericClass(parameter.type(), reflectClasses));
     //find annotations
-    for (AnnotationDesc annotationDesc : parameter.annotations()) {
+    for (AnnotationMirror annotationDesc : parameter.annotations()) {
       reflectParameter.getAnnotations().add(convertAnnotation(annotationDesc));
     }
     return reflectParameter;
   }
 
-  private static ReflectField convertField(FieldDoc fieldDoc, List<ReflectClass<ClassDoc>> reflectClasses) {
+  private static ReflectField convertField(VariableElement fieldDoc, List<ReflectClass<TypeElement>> reflectClasses) {
     ReflectField field = new ReflectField();
     field.setSimpleName(fieldDoc.name());
     field.setName(fieldDoc.qualifiedName());
@@ -125,18 +138,18 @@ public class DocletConverter {
     field.setDefaultValue(fieldDoc.constantValue() != null ? fieldDoc.constantValue().toString() : null);
     field.setType(convertGenericClass(fieldDoc.type(), reflectClasses));
     //find annotations
-    for (AnnotationDesc annotationDesc : fieldDoc.annotations()) {
+    for (AnnotationMirror annotationDesc : fieldDoc.annotations()) {
       field.getAnnotations().add(convertAnnotation(annotationDesc));
     }
     return field;
   }
 
-  private static ReflectAnnotation convertAnnotation(AnnotationDesc annotationDesc) {
+  private static ReflectAnnotation convertAnnotation(AnnotationMirror annotationDesc) {
     ReflectAnnotation annotation = new ReflectAnnotation();
     annotation.setSimpleName(annotationDesc.annotationType().simpleTypeName());
     annotation.setName(annotationDesc.annotationType().qualifiedName());
     annotation.setPackageName(annotationDesc.annotationType().containingPackage() != null ? annotationDesc.annotationType().containingPackage().name() : null);
-    for (AnnotationDesc.ElementValuePair pair : annotationDesc.elementValues()) {
+    for (AnnotationValue pair : annotationDesc.elementValues()) {
       Object value = pair.value() != null ? pair.value().value() : null;
       if(value != null) {
         ReflectAnnotationValue annotationValue = convertAnnotationValue(value, value.toString());
@@ -156,12 +169,12 @@ public class DocletConverter {
       AnnotationDescImpl annotationDesc = (AnnotationDescImpl) value;
       ReflectAnnotation annotation = convertAnnotation(annotationDesc);
       return new ReflectAnnotationValue(raw, annotation);
-    }else if(value instanceof ClassDoc){
-      ReflectClass<ClassDoc> clazz = convertClass((ClassDoc)value);
+    }else if(value instanceof TypeElement){
+      ReflectClass<TypeElement> clazz = convertClass((TypeElement)value);
       return new ReflectAnnotationValue(raw, clazz);
     }else if (value.getClass().isArray()) {
       Object[] array = (Object[]) value;
-      List<ReflectAnnotationValue> list = new ArrayList();
+      List<ReflectAnnotationValue> list = new ArrayList<>();
       for(Object item : array){
         list.add(convertAnnotationValue(item, ""));
       }
@@ -170,17 +183,17 @@ public class DocletConverter {
     return new ReflectAnnotationValue(raw, value);
   }
 
-  private static ReflectGenericClass convertGenericClass(Type type, List<ReflectClass<ClassDoc>> classes) {
+  private static ReflectGenericClass convertGenericClass(TypeMirror type, List<ReflectClass<TypeElement>> classes) {
     ReflectGenericClass genericClass = new ReflectGenericClass();
-    Optional<ReflectClass<ClassDoc>> optional = classes.stream().filter(clazz -> clazz.getName().equals(type.qualifiedTypeName())).findFirst();
-    ReflectClass<ClassDoc> reflectClass;
+    Optional<ReflectClass<TypeElement>> optional = classes.stream().filter(clazz -> clazz.getName().equals(type.qualifiedTypeName())).findFirst();
+    ReflectClass<TypeElement> reflectClass;
     if (optional.isPresent()) {
       reflectClass = optional.get();
     } else {
-      if (type.asClassDoc() != null) {
+      if (type.asTypeElement() != null) {
         reflectClass = convertClass(type.asClassDoc());
       } else {
-        reflectClass = new ReflectClass();
+        reflectClass = new ReflectClass<>();
         reflectClass.setName(type.qualifiedTypeName());
         reflectClass.setSimpleName(type.simpleTypeName());
       }
@@ -200,36 +213,36 @@ public class DocletConverter {
     return genericClass;
   }
 
-  private static ReflectClass<ClassDoc> convertClass(ClassDoc classDoc) {
-    ReflectClass<ClassDoc> reflectClass = new ReflectClass();
-    reflectClass.setOriginal(classDoc);
-    reflectClass.setName(classDoc.qualifiedName());
-    reflectClass.setSimpleName(classDoc.simpleTypeName());
-    reflectClass.setPackageName(classDoc.containingPackage() != null ? classDoc.containingPackage().name() : null);
+  private static ReflectClass<TypeElement> convertClass(TypeElement typeElement) {
+    ReflectClass<TypeElement> reflectClass = new ReflectClass<>();
+    reflectClass.setOriginal(typeElement);
+    reflectClass.setName(typeElement.qualifiedName());
+    reflectClass.setSimpleName(typeElement.simpleTypeName());
+    reflectClass.setPackageName(typeElement.containingPackage() != null ? typeElement.containingPackage().name() : null);
     if (reflectClass.getPackageName() != null) {
-      reflectClass.setFile(reflectClass.getPackageName().replaceAll("\\.", "/") + "/" + classDoc.position().file().getName());
+      reflectClass.setFile(reflectClass.getPackageName().replaceAll("\\.", "/") + "/" + typeElement.position().file().getName());
     } else {
-      reflectClass.setFile(classDoc.position().file().getName());
+      reflectClass.setFile(typeElement.position().file().getName());
     }
-    reflectClass.setAbstract(classDoc.isAbstract());
-    if (classDoc.isEnum()) {
+    reflectClass.setAbstract(typeElement.isAbstract());
+    if (typeElement.isEnum()) {
       reflectClass.setType(ClassType.ENUM);
-    } else if (classDoc.isInterface()) {
+    } else if (typeElement.isInterface()) {
       reflectClass.setType(ClassType.INTERFACE);
-    } else if (classDoc.isClass()) {
+    } else if (typeElement.isClass()) {
       reflectClass.setType(ClassType.CLASS);
     } else {
       reflectClass.setType(ClassType.OTHER);
     }
-    reflectClass.setDescription(convertDoc(classDoc));
+    reflectClass.setDescription(convertDoc(typeElement));
     return reflectClass;
   }
 
 
-  private static ReflectDescription convertDoc(Doc doc) {
+  private static ReflectDescription convertDoc(Element element) {
     ReflectDescription reflectDescription = new ReflectDescription();
-    reflectDescription.setText(doc.commentText());
-    for (Tag tag : doc.tags()) {
+    reflectDescription.setText(element.commentText());
+    for (DocTree tag : element.tags()) {
       reflectDescription.getTags().add(new ReflectDescriptionTag(tag.kind(), tag.text()));
     }
     return reflectDescription;

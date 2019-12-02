@@ -1,6 +1,6 @@
-
 apply plugin: 'groovy'
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 repositories {
@@ -9,16 +9,16 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
-    compile files("${System.properties['java.home']}/../lib/tools.jar")
-    compile("com.fasterxml.jackson.core:jackson-databind:2.7.5")
-    compile ("com.maxxton:microdocs-core-java:1.9.6")
-    testCompile("junit:junit:4.12")
+    api gradleApi()
+    api 'org.codehaus.groovy:groovy-all:2.5.8'
+    api files("${System.properties['java.home']}/../lib/tools.jar")
+    api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
+    api ("com.maxxton:microdocs-core-java:2.0.0")
+    api("junit:junit:4.12")
 }
 
 group='com.maxxton'
-version = '1.9.6'
+version = '2.0.0'
 
 task fatJar(type: Jar) {
     manifest {
