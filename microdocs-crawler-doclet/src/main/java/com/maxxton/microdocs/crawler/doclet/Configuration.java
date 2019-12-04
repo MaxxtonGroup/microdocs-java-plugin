@@ -7,12 +7,12 @@ package com.maxxton.microdocs.crawler.doclet;
  */
 public class Configuration {
 
-  public static final String OPTION_DIRECTORY = "-d";
-  public static final String OPTION_FILENAME = "-f";
-  public static final String OPTION_CRAWLER = "-crawler";
-  public static final String OPTION_VERSION = "-version";
-  public static final String OPTION_GROUP = "-group";
-  public static final String OPTION_PROJECT_NAME = "-projectName";
+  static final String OPTION_DIRECTORY = "-d";
+  static final String OPTION_FILENAME = "-f";
+  static final String OPTION_CRAWLER = "-crawler";
+  static final String OPTION_VERSION = "-version";
+  static final String OPTION_GROUP = "-group";
+  static final String OPTION_PROJECT_NAME = "-projectName";
   private static final String DEFAULT_DIRECTORY = ".";
   private static final String DEFAULT_FILENAME = "./microdocs.json";
   private static final String DEFAULT_CRAWLER = "spring";
@@ -24,27 +24,27 @@ public class Configuration {
   private String group;
   private String projectName;
 
-  public void setOutputDirectory(String outputDirectory) {
+  void setOutputDirectory(String outputDirectory) {
     this.outputDirectory = outputDirectory;
   }
 
-  public void setOutputFilename(String outputFilename) {
+  void setOutputFilename(String outputFilename) {
     this.outputFilename = outputFilename;
   }
 
-  public void setCrawler(String crawler) {
+  void setCrawler(String crawler) {
     this.crawler = crawler;
   }
 
-  public void setVersion(String version) {
+  void setVersion(String version) {
     this.version = version;
   }
 
-  public void setGroup(String group) {
+  void setGroup(String group) {
     this.group = group;
   }
 
-  public void setProjectName(String projectName) {
+  void setProjectName(String projectName) {
     this.projectName = projectName;
   }
 

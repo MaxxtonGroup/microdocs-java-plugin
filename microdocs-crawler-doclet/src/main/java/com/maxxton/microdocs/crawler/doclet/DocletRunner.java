@@ -51,7 +51,6 @@ public class DocletRunner extends StandardDoclet {
 
     @Override
     public boolean run(DocletEnvironment docletEnvironment) {
-
         Logger.get().info("Collect MicroDocs definitions for " + config.getGroup() + "/" + config.getProjectName() + ":" + config.getVersion());
 
         // get crawler
@@ -67,7 +66,7 @@ public class DocletRunner extends StandardDoclet {
         // convert Doclet classes to reflect classes
         Set<? extends Element> specifiedElements = docletEnvironment.getSpecifiedElements();
         Set<TypeElement> typeElements = ElementFilter.typesIn(specifiedElements);
-        List<ReflectClass<?>> classes = DocletConverter.convert(new ArrayList<>(typeElements));
+        List<ReflectClass<?>> classes = DocletConverter.convert(docletEnvironment, new ArrayList<>(typeElements));
 
         // run crawler
         Project project = crawler.crawl(classes);
