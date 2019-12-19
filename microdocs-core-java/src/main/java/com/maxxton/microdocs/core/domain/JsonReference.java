@@ -1,6 +1,5 @@
 package com.maxxton.microdocs.core.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -8,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class JsonReference {
 
-    @JsonProperty("$ref")
-    private String reference;
+  @JsonProperty("$ref")
+  private String reference;
 
-    public String getReference() {
-        return reference;
-    }
+  public String getReference() {
+    return reference;
+  }
 
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
 }

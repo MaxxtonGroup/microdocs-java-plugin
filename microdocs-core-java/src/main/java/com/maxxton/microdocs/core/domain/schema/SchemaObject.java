@@ -49,7 +49,7 @@ public class SchemaObject extends Schema {
 
   public void addAnyOf(Schema schema) {
     if (this.anyOf == null) {
-      this.anyOf = new ArrayList();
+      this.anyOf = new ArrayList<>();
     }
     this.anyOf.add(schema);
   }

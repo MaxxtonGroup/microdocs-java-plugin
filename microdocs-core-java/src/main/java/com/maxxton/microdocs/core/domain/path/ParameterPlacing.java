@@ -8,17 +8,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum ParameterPlacing {
 
-    QUERY, HEADER, PATH, FORMDATA, BODY;
+  QUERY, HEADER, PATH, FORMDATA, BODY;
 
+  @JsonCreator
+  public static ParameterPlacing fromString(String key) {
+    return key == null ? null : ParameterPlacing.valueOf(key.toUpperCase());
+  }
 
-    @JsonCreator
-    public static ParameterPlacing fromString(String key) {
-        return key == null ? null : ParameterPlacing.valueOf(key.toUpperCase());
-    }
-
-    @JsonValue
-    public String getKey() {
-        return name().toLowerCase();
-    }
+  @JsonValue
+  public String getKey() {
+    return name().toLowerCase();
+  }
 
 }

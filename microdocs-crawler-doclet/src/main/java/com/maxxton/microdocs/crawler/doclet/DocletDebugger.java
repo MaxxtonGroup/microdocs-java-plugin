@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.tools.DocumentationTool;
-import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 /**
@@ -15,39 +14,35 @@ import javax.tools.ToolProvider;
  */
 public class DocletDebugger {
 
-    public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.err.println("usage: <javadoc_options_file>");
-            System.exit(1);
-        }
-        File file = new File(args[0]);
-        if (!file.isFile()) {
-            System.err.println("Could not find file: " + file.getAbsolutePath());
-            System.exit(1);
-        }
-
-        List<String> arguments = new ArrayList<>();
-        arguments.add("-docletpath");
-        // TODO
-        arguments.add("C:/Users/steve/projects/microdocs/microdocs-java-plugin/microdocs-crawler-doclet/build/classes/main");
-        arguments.add("-doclet");
-        arguments.add(DocletRunner.class.getName());
-        arguments.add("@" + file.getAbsolutePath());
-
-        System.out.print("args:");
-        arguments.forEach(arg -> System.out.print(" " + arg));
-        System.out.println();
-        // TODO
-        DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
-        try (StandardJavaFileManager fm = tool.getStandardFileManager(null, null, null)) {
-            DocumentationTool.DocumentationTask t = tool.getTask(null, fm, null, DocletRunner.class, null, null);
-            if (t.call()) {
-                System.out.println("task succeeded");
-            } else {
-                throw new Exception("task failed");
-            }
-
-        }
+  public static void main(String[] args) {
+    if (args.length != 1) {
+      System.err.println("usage: <javadoc_options_file>");
+      System.exit(1);
     }
+    File file = new File(args[0]);
+    if (!file.isFile()) {
+      System.err.println("Could not find file: " + file.getAbsolutePath());
+      System.exit(1);
+    }
+
+    List<String> arguments = new ArrayList<>();
+    //        arguments.add("-docletpath");
+    //        arguments.add("/Users/robsonke/maxxton/github/microdocs-java-plugin/microdocs-crawler-doclet/build/classes/java/main");
+    //        arguments.add("-doclet");
+    //        arguments.add(DocletRunner.class.getName());
+    //arguments.add("/Users/robsonke/maxxton/sources/mxt2/services/config-server/src/main/java/com/maxxton/config/config/WebSecurityConfig.java");
+    arguments.add("@" + file.getAbsolutePath());
+    //arguments.add("@/Users/robsonke/maxxton/sources/mxt2/services/config-server/src/main/java/com/maxxton/config/config/WebSecurityConfig.java");
+
+    System.out.print("args:");
+    arguments.forEach(arg -> System.out.print(" " + arg));
+    System.out.println();
+
+    DocumentationTool javadoc = ToolProvider.getSystemDocumentationTool();
+    String argsString = String.join(" ", arguments);
+    System.out.println("command: javadoc " + argsString);
+    int result = javadoc.run(System.in, System.out, System.err, arguments.toArray(String[]::new));
+    System.out.println("task result: " + result);
+  }
 
 }

@@ -36,14 +36,14 @@ public class DocletErrorReporter extends Logger {
   public void info(String msg) {
     super.info(msg);
     if (getLevel().match(LogLevel.INFO)) {
-      delegate.print(Diagnostic.Kind.ERROR, msg);
+      delegate.print(Diagnostic.Kind.NOTE, msg);
     }
   }
 
   public void warning(String msg) {
     super.warning(msg);
     if (getLevel().match(LogLevel.WARNING)) {
-      delegate.print(Diagnostic.Kind.ERROR, msg);
+      delegate.print(Diagnostic.Kind.WARNING, msg);
     }
   }
 

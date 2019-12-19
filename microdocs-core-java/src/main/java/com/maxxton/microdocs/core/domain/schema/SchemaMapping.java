@@ -8,49 +8,49 @@ import java.util.List;
  */
 public class SchemaMapping {
 
-    private boolean ignore = false;
-    private String name;
-    private boolean primary = false;
-    private List<String> tables = new ArrayList();
-    private List<String> views = new ArrayList();
+  private boolean ignore = false;
+  private String name;
+  private boolean primary = false;
+  private List<String> tables = new ArrayList<>();
+  private List<String> views = new ArrayList<>();
 
-    public boolean isIgnore() {
-        return ignore;
-    }
+  public boolean isIgnore() {
+    return ignore;
+  }
 
-    public void setIgnore(boolean ignore) {
-        this.ignore = ignore;
-    }
+  public void setIgnore(boolean ignore) {
+    this.ignore = ignore;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public List<String> getTables() {
-        return tables;
-    }
+  public List<String> getTables() {
+    return tables;
+  }
 
-    public void setTables(List<String> tables) {
-        this.tables = tables;
-    }
+  public void setTables(List<String> tables) {
+    this.tables = tables;
+  }
 
-    public boolean isPrimary() {
-        return primary;
-    }
+  public boolean isPrimary() {
+    return primary;
+  }
 
-    public void setPrimary(boolean primary) {
-        this.primary = primary;
-    }
+  public void setPrimary(boolean primary) {
+    this.primary = primary;
+  }
 
-    public List<String> getViews() {
-        return views;
-    }
+  public List<String> getViews() {
+    return views;
+  }
 
-    public void setViews(List<String> views) {
-        this.views = views;
-    }
+  public void setViews(List<String> views) {
+    this.views = views;
+  }
 }

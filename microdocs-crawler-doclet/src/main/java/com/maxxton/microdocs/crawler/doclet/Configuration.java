@@ -10,7 +10,7 @@ public class Configuration {
   static final String OPTION_DIRECTORY = "-d";
   static final String OPTION_FILENAME = "-f";
   static final String OPTION_CRAWLER = "-crawler";
-  static final String OPTION_VERSION = "-version";
+  static final String OPTION_VERSION = "-apiVersion";
   static final String OPTION_GROUP = "-group";
   static final String OPTION_PROJECT_NAME = "-projectName";
   private static final String DEFAULT_DIRECTORY = ".";

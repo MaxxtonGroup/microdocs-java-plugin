@@ -1,23 +1,24 @@
 package com.maxxton.microdocs.core.builder;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 import com.maxxton.microdocs.core.domain.Project;
 import com.maxxton.microdocs.core.domain.common.ExternalDocs;
 import com.maxxton.microdocs.core.domain.common.ProjectInfo;
 import com.maxxton.microdocs.core.domain.common.SecurityDefinition;
 import com.maxxton.microdocs.core.domain.common.Tag;
+import com.maxxton.microdocs.core.domain.component.Component;
 import com.maxxton.microdocs.core.domain.component.ComponentType;
 import com.maxxton.microdocs.core.domain.dependency.Dependency;
 import com.maxxton.microdocs.core.domain.path.Parameter;
 import com.maxxton.microdocs.core.domain.path.ParameterPlacing;
+import com.maxxton.microdocs.core.domain.path.Path;
 import com.maxxton.microdocs.core.domain.path.Response;
 import com.maxxton.microdocs.core.domain.problem.Problem;
-import com.maxxton.microdocs.core.domain.component.Component;
 import com.maxxton.microdocs.core.domain.schema.Schema;
-import com.maxxton.microdocs.core.domain.path.Path;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Build project
@@ -45,7 +46,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder projectClass(String projectClass) {
     if (projectClasses == null) {
-      projectClasses = new ArrayList();
+      projectClasses = new ArrayList<>();
     }
     projectClasses.add(projectClass);
     return this;
@@ -73,7 +74,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder schemas(String... schemas) {
     if (project.getSchemas() == null) {
-      project.setSchemas(new ArrayList());
+      project.setSchemas(new ArrayList<>());
     }
     for (String schema : schemas) {
       project.getSchemas().add(schema);
@@ -83,7 +84,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder schemas(List<String> schemas) {
     if (project.getSchemas() == null) {
-      project.setSchemas(new ArrayList());
+      project.setSchemas(new ArrayList<>());
     }
     project.getSchemas().addAll(schemas);
     return this;
@@ -120,7 +121,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder tag(Tag tag) {
     if (project.getTags() == null) {
-      project.setTags(new ArrayList());
+      project.setTags(new ArrayList<>());
     }
     project.getTags().add(tag);
     return this;
@@ -128,7 +129,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder tags(Tag... tags) {
     if (project.getTags() == null) {
-      project.setTags(new ArrayList());
+      project.setTags(new ArrayList<>());
     }
     for (Tag tag : tags) {
       project.getTags().add(tag);
@@ -138,7 +139,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder tags(List<Tag> tags) {
     if (project.getTags() == null) {
-      project.setTags(new ArrayList());
+      project.setTags(new ArrayList<>());
     }
     project.getTags().addAll(tags);
     return this;
@@ -159,7 +160,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder externalDoc(ExternalDocs externalDocs) {
     if (project.getExternalDocs() == null) {
-      project.setExternalDocs(new ArrayList());
+      project.setExternalDocs(new ArrayList<>());
     }
     project.getExternalDocs().add(externalDocs);
     return this;
@@ -167,7 +168,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder externalDocs(ExternalDocs... externalDocs) {
     if (project.getExternalDocs() == null) {
-      project.setExternalDocs(new ArrayList());
+      project.setExternalDocs(new ArrayList<>());
     }
     for (ExternalDocs externalDoc : externalDocs) {
       project.getExternalDocs().add(externalDoc);
@@ -177,7 +178,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder externalDocs(List<ExternalDocs> externalDocs) {
     if (project.getExternalDocs() == null) {
-      project.setExternalDocs(new ArrayList());
+      project.setExternalDocs(new ArrayList<>());
     }
     project.getExternalDocs().addAll(externalDocs);
     return this;
@@ -185,58 +186,49 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder securityDefinitions(String name, SecurityDefinition securityDefinition) {
     if (project.getSecurityDefinitions() == null) {
-      project.setSecurityDefinitions(new HashMap());
+      project.setSecurityDefinitions(new HashMap<>());
     }
     project.getSecurityDefinitions().put(name, securityDefinition);
     return this;
   }
 
   public ProjectBuilder security(String name, String... scopes) {
-    List<String> scopeList = new ArrayList();
-    for (String scope : scopes) {
-      scopeList.add(scope);
-    }
+    List<String> scopeList = new ArrayList<>(Arrays.asList(scopes));
     security(name, scopeList);
     return this;
   }
 
   public ProjectBuilder security(String name, List<String> scopeList) {
     if (project.getSecurity() == null) {
-      project.setSecurity(new HashMap());
+      project.setSecurity(new HashMap<>());
     }
     project.getSecurity().put(name, scopeList);
     return this;
   }
 
   public ProjectBuilder consumes(String... consumes) {
-    List<String> consumeList = new ArrayList();
-    for (String consume : consumes) {
-      consumeList.add(consume);
-    }
+    List<String> consumeList = new ArrayList<>(Arrays.asList(consumes));
     consumes(consumeList);
     return this;
   }
 
   public ProjectBuilder consumes(List<String> consumes) {
     if (project.getConsumes() == null) {
-      project.setConsumes(new ArrayList());
+      project.setConsumes(new ArrayList<>());
     }
     project.getConsumes().addAll(consumes);
     return this;
   }
 
   public ProjectBuilder produces(String... produces) {
-    List<String> produceList = new ArrayList();
-    for (String produce : produces) {
-      produceList.add(produce);
-    }
+    List<String> produceList = new ArrayList<>(Arrays.asList(produces));
     produces(produceList);
     return this;
   }
 
   public ProjectBuilder produces(List<String> produces) {
     if (project.getProduces() == null) {
-      project.setProduces(new ArrayList());
+      project.setProduces(new ArrayList<>());
     }
     project.getProduces().addAll(produces);
     return this;
@@ -249,12 +241,10 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder path(String path, String method, Path endpoint) {
     if (project.getPaths() == null) {
-      project.setPaths(new HashMap());
+      project.setPaths(new HashMap<>());
     }
-    if (project.getPaths().get(path) == null) {
-      project.getPaths().put(path, new HashMap());
-    }
-    if(project.getPaths().get(path).get(method) != null){
+    project.getPaths().computeIfAbsent(path, k -> new HashMap<>());
+    if (project.getPaths().get(path).get(method) != null) {
       // merge request
       Path existingPath = project.getPaths().get(path).get(method);
       endpoint.getParameters().stream()
@@ -264,9 +254,9 @@ public class ProjectBuilder implements Builder<Project> {
           .filter(param -> {
             long count = existingPath.getParameters().stream().filter(eParam -> eParam.getName().equalsIgnoreCase(param.getName())).count();
             return count == 0;
-          })
-          .forEach(param -> existingPath.getParameters().add(param));
-    }else{
+          }).forEach(param -> existingPath.getParameters().add(param));
+    }
+    else {
       project.getPaths().get(path).put(method, endpoint);
     }
     return this;
@@ -274,7 +264,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder definition(String name, Schema schema) {
     if (project.getDefinitions() == null) {
-      project.setDefinitions(new HashMap());
+      project.setDefinitions(new HashMap<>());
     }
     project.getDefinitions().put(name, schema);
     return this;
@@ -282,7 +272,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder parameter(String name, Parameter parameter) {
     if (project.getParameters() == null) {
-      project.setParameters(new HashMap());
+      project.setParameters(new HashMap<>());
     }
     project.getParameters().put(name, parameter);
     return this;
@@ -290,7 +280,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder response(String name, Response response) {
     if (project.getResponses() == null) {
-      project.setResponses(new HashMap());
+      project.setResponses(new HashMap<>());
     }
     project.getResponses().put(name, response);
     return this;
@@ -298,7 +288,7 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder component(String name, Component component) {
     if (project.getComponents() == null) {
-      project.setComponents(new HashMap());
+      project.setComponents(new HashMap<>());
     }
     project.getComponents().put(name, component);
     if (project.getInfo() == null || (project.getInfo() != null && project.getInfo().getDescription() != null && !project.getInfo().getDescription().trim().isEmpty())) {
@@ -315,24 +305,24 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder dependency(String name, Dependency dependency) {
     if (project.getDependencies() == null) {
-      project.setDependencies(new HashMap());
+      project.setDependencies(new HashMap<>());
     }
 
-    if(project.getDependencies().containsKey(name.toLowerCase())){
+    if (project.getDependencies().containsKey(name.toLowerCase())) {
       Dependency existingDependency = project.getDependencies().get(name.toLowerCase());
-      if(existingDependency.getDescription() == null || existingDependency.getDescription().isEmpty()){
+      if (existingDependency.getDescription() == null || existingDependency.getDescription().isEmpty()) {
         existingDependency.setDescription(dependency.getDescription());
       }
-      dependency.getPaths().entrySet().forEach(entry -> {
-        if(!existingDependency.getPaths().containsKey(entry.getKey())){
-          existingDependency.getPaths().put(entry.getKey(),entry.getValue());
-        }else{
-          entry.getValue().entrySet().forEach(subEntry -> {
-            existingDependency.getPaths().get(entry.getKey()).put(subEntry.getKey(), subEntry.getValue());
-          });
+      dependency.getPaths().forEach((key, value) -> {
+        if (!existingDependency.getPaths().containsKey(key)) {
+          existingDependency.getPaths().put(key, value);
+        }
+        else {
+          value.forEach((key1, value1) -> existingDependency.getPaths().get(key).put(key1, value1));
         }
       });
-    }else {
+    }
+    else {
       project.getDependencies().put(name.toLowerCase(), dependency);
     }
     return this;
@@ -340,24 +330,21 @@ public class ProjectBuilder implements Builder<Project> {
 
   public ProjectBuilder problem(Problem problem) {
     if (project.getProblems() == null) {
-      project.setProblems(new ArrayList());
+      project.setProblems(new ArrayList<>());
     }
     project.getProblems().add(problem);
     return this;
   }
 
   public ProjectBuilder problems(Problem... problems) {
-    List<Problem> problemList = new ArrayList();
-    for (Problem problem : problems) {
-      problemList.add(problem);
-    }
+    List<Problem> problemList = new ArrayList<>(Arrays.asList(problems));
     problems(problemList);
     return this;
   }
 
   public ProjectBuilder problems(List<Problem> problems) {
     if (project.getProblems() == null) {
-      project.setProblems(new ArrayList());
+      project.setProblems(new ArrayList<>());
     }
     project.getProblems().addAll(problems);
     return this;

@@ -55,7 +55,7 @@ public class SchemaMappingsBuilder implements Builder<SchemaMappings> {
   public SchemaMappingsBuilder view(String name) {
     initJson();
     if (mappings.getJson().getViews() == null) {
-      mappings.getJson().setViews(new ArrayList());
+      mappings.getJson().setViews(new ArrayList<>());
     }
     mappings.getJson().getViews().add(name);
     return this;

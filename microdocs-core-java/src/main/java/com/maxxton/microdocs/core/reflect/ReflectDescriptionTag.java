@@ -17,21 +17,8 @@ public class ReflectDescriptionTag {
 
   public ReflectDescriptionTag(String tagName, String text) {
     setTagName(tagName);
-    String[] split = text.split(" ");
-    if (split.length > 0) {
-      setKeyword(split[0]);
-    } else {
-      setKeyword(null);
-    }
-    if (split.length > 1) {
-      String desc = split[1];
-      for (int i = 2; i < split.length; i++) {
-        desc += " " + split[i];
-      }
-      setDescription(desc);
-    } else {
-      setDescription(null);
-    }
+    setKeyword(null);
+    setDescription(text);
   }
 
   public ReflectDescriptionTag(String text) {

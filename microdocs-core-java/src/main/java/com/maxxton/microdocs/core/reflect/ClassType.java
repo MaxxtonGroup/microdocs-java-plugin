@@ -5,6 +5,6 @@ package com.maxxton.microdocs.core.reflect;
  */
 public enum ClassType {
 
-    CLASS, ENUM, INTERFACE, OTHER;
+  CLASS, ENUM, INTERFACE, OTHER;
 
 }

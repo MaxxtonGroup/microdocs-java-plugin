@@ -8,18 +8,18 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum ProblemLevel {
 
-    NOTICE,
-    WARNING,
-    ERROR;
+  NOTICE,
+  WARNING,
+  ERROR;
 
-    @JsonCreator
-    public static ProblemLevel fromString(String key) {
-        return key == null ? null : ProblemLevel.valueOf(key.toUpperCase());
-    }
+  @JsonCreator
+  public static ProblemLevel fromString(String key) {
+    return key == null ? null : ProblemLevel.valueOf(key.toUpperCase());
+  }
 
-    @JsonValue
-    public String getKey() {
-        return name().toLowerCase();
-    }
+  @JsonValue
+  public String getKey() {
+    return name().toLowerCase();
+  }
 
 }

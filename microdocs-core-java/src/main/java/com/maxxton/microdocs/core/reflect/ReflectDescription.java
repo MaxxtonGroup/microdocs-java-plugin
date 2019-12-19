@@ -9,26 +9,28 @@ import java.util.stream.Collectors;
  */
 public class ReflectDescription {
 
-    private String text = "";
-    private List<ReflectDescriptionTag> tags = new ArrayList();
+  private String text = "";
+  private List<ReflectDescriptionTag> tags = new ArrayList<>();
 
-    public String getText() {
-        return text;
-    }
+  public String getText() {
+    return text;
+  }
 
-    public void setText(String text) {
-        this.text = text;
+  public void setText(String text) {
+    if (text != null) {
+      this.text = text;
     }
+  }
 
-    public List<ReflectDescriptionTag> getTags() {
-        return tags;
-    }
+  public List<ReflectDescriptionTag> getTags() {
+    return tags;
+  }
 
-    public List<ReflectDescriptionTag> getTags(String name){
-        return tags.stream().filter(tag -> tag.getTagName().equalsIgnoreCase(name)).collect(Collectors.toList());
-    }
+  public List<ReflectDescriptionTag> getTags(String name) {
+    return tags.stream().filter(tag -> tag.getTagName().equalsIgnoreCase(name)).collect(Collectors.toList());
+  }
 
-    public void setTags(List<ReflectDescriptionTag> tags) {
-        this.tags = tags;
-    }
+  public void setTags(List<ReflectDescriptionTag> tags) {
+    this.tags = tags;
+  }
 }

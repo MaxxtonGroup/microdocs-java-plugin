@@ -8,23 +8,22 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum ComponentType {
 
-    APPLICATION,
-    SERVICE,
-    CONTROLLER,
-    CLIENT,
-    REPOSITORY,
-    CONFIGURATION,
-    COMPONENT;
+  APPLICATION,
+  SERVICE,
+  CONTROLLER,
+  CLIENT,
+  REPOSITORY,
+  CONFIGURATION,
+  COMPONENT;
 
+  @JsonCreator
+  public static ComponentType fromString(String key) {
+    return key == null ? null : ComponentType.valueOf(key.toUpperCase());
+  }
 
-    @JsonCreator
-    public static ComponentType fromString(String key) {
-        return key == null ? null : ComponentType.valueOf(key.toUpperCase());
-    }
-
-    @JsonValue
-    public String getKey() {
-        return name().toLowerCase();
-    }
+  @JsonValue
+  public String getKey() {
+    return name().toLowerCase();
+  }
 
 }

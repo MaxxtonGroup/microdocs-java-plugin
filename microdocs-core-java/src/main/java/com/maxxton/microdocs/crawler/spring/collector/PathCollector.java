@@ -1,29 +1,42 @@
 package com.maxxton.microdocs.crawler.spring.collector;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.maxxton.microdocs.core.builder.PathBuilder;
 import com.maxxton.microdocs.core.collector.Collector;
 import com.maxxton.microdocs.core.collector.SchemaCollector;
-import com.maxxton.microdocs.core.domain.path.*;
+import com.maxxton.microdocs.core.domain.path.Parameter;
+import com.maxxton.microdocs.core.domain.path.ParameterBody;
+import com.maxxton.microdocs.core.domain.path.ParameterPlacing;
+import com.maxxton.microdocs.core.domain.path.ParameterVariable;
+import com.maxxton.microdocs.core.domain.path.Response;
 import com.maxxton.microdocs.core.domain.schema.Schema;
 import com.maxxton.microdocs.core.domain.schema.SchemaObject;
 import com.maxxton.microdocs.core.domain.schema.SchemaType;
-import com.maxxton.microdocs.core.reflect.*;
 import com.maxxton.microdocs.core.logging.Logger;
+import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
+import com.maxxton.microdocs.core.reflect.ReflectAnnotationValue;
+import com.maxxton.microdocs.core.reflect.ReflectClass;
+import com.maxxton.microdocs.core.reflect.ReflectDescriptionTag;
+import com.maxxton.microdocs.core.reflect.ReflectMethod;
+import com.maxxton.microdocs.core.reflect.ReflectParameter;
 import com.maxxton.microdocs.crawler.spring.Types;
 import com.maxxton.microdocs.crawler.spring.parser.PageableParser;
 import com.maxxton.microdocs.crawler.spring.parser.SpecificationsParser;
-
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author Steven Hermans
  */
 public class PathCollector implements Collector<PathBuilder> {
 
-  private final String[] defaultConsumes = new String[]{"application/json"};
-  private final String[] defaultProduces = new String[]{"application/json"};
+  private final String[] defaultConsumes = new String[] { "application/json" };
+  private final String[] defaultProduces = new String[] { "application/json" };
 
   private static final String TYPE_REQUEST_BODY = "org.springframework.web.bind.annotation.RequestBody";
   private static final String TYPE_REQUEST_PARAM = "org.springframework.web.bind.annotation.RequestParam";
@@ -33,16 +46,11 @@ public class PathCollector implements Collector<PathBuilder> {
 
   private SchemaCollector schemaCollector;
   private final String[] controllers;
-  private final List<String> requestMappers = Arrays.asList(new String[]{
-      Types.REQUEST_MAPPING.getClassName(),
-      Types.GET_MAPPING.getClassName(),
-      Types.DELETE_MAPPING.getClassName(),
-      Types.PATCH_MAPPING.getClassName(),
-      Types.POST_MAPPING.getClassName(),
-      Types.PUT_MAPPING.getClassName()
-  });
+  private final List<String> requestMappers = Arrays
+      .asList(Types.REQUEST_MAPPING.getClassName(), Types.GET_MAPPING.getClassName(), Types.DELETE_MAPPING.getClassName(), Types.PATCH_MAPPING.getClassName(), Types.POST_MAPPING.getClassName(),
+          Types.PUT_MAPPING.getClassName());
 
-  private final RequestParser[] requestParsers = new RequestParser[]{new PageableParser(), new SpecificationsParser()};
+  private final RequestParser[] requestParsers = new RequestParser[] { new PageableParser(), new SpecificationsParser() };
 
   public PathCollector(SchemaCollector schemaCollector, Types... controllers) {
     this.schemaCollector = schemaCollector;
@@ -55,10 +63,10 @@ public class PathCollector implements Collector<PathBuilder> {
 
   @Override
   public List<PathBuilder> collect(List<ReflectClass<?>> classes) {
-    List<PathBuilder> pathBuilders = new ArrayList();
+    List<PathBuilder> pathBuilders = new ArrayList<>();
     classes.stream().filter(reflectClass -> reflectClass.hasAnnotation(controllers)).forEach(controller -> {
       Logger.get().debug("Crawl controller: " + controller.getSimpleName());
-      String[] mappers = requestMappers.toArray(new String[requestMappers.size()]);
+      String[] mappers = requestMappers.toArray(new String[0]);
       controller.getDeclaredMethods().stream().filter(method -> method.hasAnnotation(mappers)).forEach(method -> {
         Logger.get().debug("Crawl controller method: " + method.getSimpleName());
         pathBuilders.addAll(collectPaths(controller, method));
@@ -69,9 +77,11 @@ public class PathCollector implements Collector<PathBuilder> {
 
   private List<PathBuilder> collectPaths(ReflectClass<?> controller, ReflectMethod method) {
     // Get first mappings
-    ReflectAnnotation controllerRequestMapping = controller.getAnnotations().stream().filter(annotation -> !requestMappers.stream().filter(mapper -> mapper.equals(annotation.getName())).collect(Collectors.toList()).isEmpty()).findFirst().orElse(null);
-    ReflectAnnotation methodRequestMapping = method.getAnnotations().stream().filter(annotation -> !requestMappers.stream().filter(mapper -> mapper.equals(annotation.getName())).collect(Collectors.toList()).isEmpty()).findFirst().orElse(null);
-    List<Parameter> parameters = new ArrayList();
+    ReflectAnnotation controllerRequestMapping = controller.getAnnotations().stream().filter(annotation -> requestMappers.stream().anyMatch(mapper -> mapper.equals(annotation.getName()))).findFirst()
+        .orElse(null);
+    ReflectAnnotation methodRequestMapping = method.getAnnotations().stream().filter(annotation -> requestMappers.stream().anyMatch(mapper -> mapper.equals(annotation.getName()))).findFirst()
+        .orElse(null);
+    List<Parameter> parameters = new ArrayList<>();
 
     // find uri
     String controllerPath = getPath(controllerRequestMapping);
@@ -87,7 +97,7 @@ public class PathCollector implements Collector<PathBuilder> {
     if (fullPath.contains("?")) {
       String[] pathSplit = fullPath.split("\\?");
       path = pathSplit[0];
-      if (pathSplit.length >= 2){
+      if (pathSplit.length >= 2) {
         String paramsSplit = pathSplit[1];
 
         String[] params = paramsSplit.split("&");
@@ -101,44 +111,38 @@ public class PathCollector implements Collector<PathBuilder> {
           if (paramSplit.length > 1) {
             parameter.setDefaultValue(paramSplit[1]);
             parameter.setType(SchemaType.ENUM);
-            List enums = new ArrayList();
+            List<String> enums = new ArrayList<>();
             enums.add(paramSplit[1]);
             parameter.setEnums(enums);
           }
           parameters.add(parameter);
         }
       }
-    } else {
+    }
+    else {
       path = fullPath;
     }
 
     // Ignore regex in path parameters
-    path = path.replaceAll("\\{.*?(\\:.*?)\\}", "");
+    path = path.replaceAll("\\{.*?(:.*?)}", "");
     String finalPath = path;
 
-
     // find methods
-    Set<String> methods = new HashSet();
+    Set<String> methods = new HashSet<>();
     methods.addAll(getMethods(controllerRequestMapping));
     methods.addAll(getMethods(methodRequestMapping));
     if (methods.isEmpty()) { //use default
       methods.add("get");
     }
-    methods.forEach(requestMethod -> {
-      Logger.get().logEndpoint(requestMethod, finalPath);
-    });
+    methods.forEach(requestMethod -> Logger.get().logEndpoint(requestMethod, finalPath));
 
-    Set<String> produces = new HashSet();
-    for (String mime : defaultProduces) {
-      produces.add(mime);
-    }
+    Set<String> produces = new HashSet<>();
+    produces.addAll(Arrays.asList(defaultProduces));
     produces.addAll(getProduces(controllerRequestMapping));
     produces.addAll(getProduces(methodRequestMapping));
 
-    Set<String> consumes = new HashSet();
-    for (String mime : defaultConsumes) {
-      consumes.add(mime);
-    }
+    Set<String> consumes = new HashSet<>();
+    consumes.addAll(Arrays.asList(defaultConsumes));
     consumes.addAll(getCondumes(controllerRequestMapping));
     consumes.addAll(getCondumes(methodRequestMapping));
 
@@ -175,14 +179,16 @@ public class PathCollector implements Collector<PathBuilder> {
         bodyParam.setDescription(description);
         bodyParam.setIn(ParameterPlacing.BODY);
         parameters.add(bodyParam);
-      } else if (parameter.hasAnnotation(TYPE_REQUEST_PARAM)) {
+      }
+      else if (parameter.hasAnnotation(TYPE_REQUEST_PARAM)) {
         ReflectAnnotation annotation = parameter.getAnnotation(TYPE_REQUEST_PARAM);
         ParameterVariable param = new ParameterVariable();
         param.setIn(ParameterPlacing.QUERY);
 
         if (annotation.has("value")) {
           name = annotation.getString("value");
-        } else if (annotation.has("name")) {
+        }
+        else if (annotation.has("name")) {
           name = annotation.getString("name");
         }
         param.setName(name);
@@ -191,14 +197,16 @@ public class PathCollector implements Collector<PathBuilder> {
         param.setDefaultValue(annotation.getObject("defaultValue"));
         param.setType(schema != null ? schema.getType() : null);
         parameters.add(param);
-      } else if (parameter.hasAnnotation(TYPE_PATH_VARIABLE)) {
+      }
+      else if (parameter.hasAnnotation(TYPE_PATH_VARIABLE)) {
         ReflectAnnotation annotation = parameter.getAnnotation(TYPE_PATH_VARIABLE);
         ParameterVariable param = new ParameterVariable();
         param.setIn(ParameterPlacing.PATH);
 
         if (annotation.has("value")) {
           name = annotation.getString("value");
-        } else if (annotation.has("name")) {
+        }
+        else if (annotation.has("name")) {
           name = annotation.getString("name");
         }
         param.setName(name);
@@ -210,33 +218,33 @@ public class PathCollector implements Collector<PathBuilder> {
     }
 
     // Find responses
-    Map<String, Response> responses = new HashMap();
+    Map<String, Response> responses = new HashMap<>();
     if (method.getReturnType() != null && method.getReturnType().getClassType() != null && !method.getReturnType().getClassType().getSimpleName().equalsIgnoreCase("void")) {
       Response response = new Response();
       for (ReflectDescriptionTag tag : method.getDescription().getTags("return")) {
-        response.setDescription(tag.getKeyword() + " " + tag.getDescription());
+        response.setDescription(tag.getDescription());
         break;
       }
 
       // JSON View
-      List<String> views = new ArrayList();
-      method.getAnnotations().stream().filter(annotation -> annotation.getName().equals(JSON_VIEW)).forEach(annotation -> {
-        annotation.getList("value").forEach(value -> {
-          if(value.getClazz() != null){
-            views.add(value.getClazz().getName());
-          }
-        });
-      });
+      List<String> views = new ArrayList<>();
+      method.getAnnotations().stream().filter(annotation -> annotation.getName().equals(JSON_VIEW)).forEach(annotation -> annotation.getList("value").forEach(value -> {
+        if (value.getClazz() != null) {
+          views.add(value.getClazz().getName());
+        }
+      }));
 
       Schema schema;
-      if(views.isEmpty()){
+      if (views.isEmpty()) {
         schema = schemaCollector.collect(method.getReturnType());
-      }else if(views.size() == 1){
+      }
+      else if (views.size() == 1) {
         schema = schemaCollector.collect(method.getReturnType(), views.get(0));
-      }else{
+      }
+      else {
         SchemaObject schemaObject = new SchemaObject();
-        schemaObject.setAnyOf(new ArrayList());
-        for(String view : views){
+        schemaObject.setAnyOf(new ArrayList<>());
+        for (String view : views) {
           Schema subSchema = schemaCollector.collect(method.getReturnType(), view);
           schemaObject.getAnyOf().add(subSchema);
         }
@@ -256,7 +264,7 @@ public class PathCollector implements Collector<PathBuilder> {
     });
 
     // create builders
-    List<PathBuilder> pathBuilders = new ArrayList();
+    List<PathBuilder> pathBuilders = new ArrayList<>();
     for (String requestMethod : methods) {
       PathBuilder builder = new PathBuilder();
       builder.path(path);
@@ -267,8 +275,8 @@ public class PathCollector implements Collector<PathBuilder> {
       builder.operationId(method.getSimpleName());
       builder.parameters(parameters);
       builder.responses(responses);
-      builder.consumes(consumes.stream().collect(Collectors.toList()));
-      builder.produces(produces.stream().collect(Collectors.toList()));
+      builder.consumes(new ArrayList<>(consumes));
+      builder.produces(new ArrayList<>(produces));
 
       pathBuilders.add(builder);
     }
@@ -279,19 +287,22 @@ public class PathCollector implements Collector<PathBuilder> {
     String path = "";
     if (requestMapping != null) {
       if (requestMapping.has("value")) {
-        if(requestMapping.getList("value") != null){
-          for(ReflectAnnotationValue p : requestMapping.getList("value")){
+        if (requestMapping.getList("value") != null) {
+          for (ReflectAnnotationValue p : requestMapping.getList("value")) {
             path = p.getString();
           }
-        }else {
+        }
+        else {
           path = requestMapping.getString("value");
         }
-      } else if (requestMapping.has("path")) {
-        if(requestMapping.getList("path") != null){
-          for(ReflectAnnotationValue p : requestMapping.getList("path")){
+      }
+      else if (requestMapping.has("path")) {
+        if (requestMapping.getList("path") != null) {
+          for (ReflectAnnotationValue p : requestMapping.getList("path")) {
             path = p.getString();
           }
-        }else {
+        }
+        else {
           path = requestMapping.getString("path");
         }
       }
@@ -300,18 +311,22 @@ public class PathCollector implements Collector<PathBuilder> {
   }
 
   private Set<String> getMethods(ReflectAnnotation requestMapping) {
-    Set<String> methodSet = new HashSet();
+    Set<String> methodSet = new HashSet<>();
     if (requestMapping != null) {
 
       if (requestMapping.getName().equals(Types.GET_MAPPING.getClassName())) {
         methodSet.add("get");
-      } else if (requestMapping.getName().equals(Types.DELETE_MAPPING.getClassName())) {
+      }
+      else if (requestMapping.getName().equals(Types.DELETE_MAPPING.getClassName())) {
         methodSet.add("delete");
-      } else if (requestMapping.getName().equals(Types.POST_MAPPING.getClassName())) {
+      }
+      else if (requestMapping.getName().equals(Types.POST_MAPPING.getClassName())) {
         methodSet.add("post");
-      } else if (requestMapping.getName().equals(Types.PUT_MAPPING.getClassName())) {
+      }
+      else if (requestMapping.getName().equals(Types.PUT_MAPPING.getClassName())) {
         methodSet.add("put");
-      } else if (requestMapping.getName().equals(Types.PATCH_MAPPING.getClassName())) {
+      }
+      else if (requestMapping.getName().equals(Types.PATCH_MAPPING.getClassName())) {
         methodSet.add("patch");
       }
 
@@ -328,7 +343,7 @@ public class PathCollector implements Collector<PathBuilder> {
   }
 
   private Set<String> getProduces(ReflectAnnotation requestMapping) {
-    Set<String> produces = new HashSet();
+    Set<String> produces = new HashSet<>();
     if (requestMapping != null) {
       if (requestMapping.has("produces")) {
         List<ReflectAnnotationValue> mimes = requestMapping.getList("produces");
@@ -343,7 +358,7 @@ public class PathCollector implements Collector<PathBuilder> {
   }
 
   private Set<String> getCondumes(ReflectAnnotation requestMapping) {
-    Set<String> produces = new HashSet();
+    Set<String> produces = new HashSet<>();
     if (requestMapping != null) {
       if (requestMapping.has("consumes")) {
         List<ReflectAnnotationValue> mimes = requestMapping.getList("consumes");

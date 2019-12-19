@@ -8,16 +8,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum DependencyType {
 
-    DATABASE, REST, INCLUDES, USES;
+  DATABASE, REST, INCLUDES, USES;
 
-    @JsonCreator
-    public static DependencyType fromString(String key) {
-        return key == null ? null : DependencyType.valueOf(key.toUpperCase());
-    }
+  @JsonCreator
+  public static DependencyType fromString(String key) {
+    return key == null ? null : DependencyType.valueOf(key.toUpperCase());
+  }
 
-    @JsonValue
-    public String getKey() {
-        return name().toLowerCase();
-    }
+  @JsonValue
+  public String getKey() {
+    return name().toLowerCase();
+  }
 
 }
