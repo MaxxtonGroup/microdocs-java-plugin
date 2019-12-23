@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.lang.model.SourceVersion;
@@ -23,7 +24,6 @@ import com.maxxton.microdocs.core.writer.Writer;
 import com.maxxton.microdocs.crawler.Crawler;
 import com.maxxton.microdocs.crawler.spring.SpringCrawler;
 
-import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 import jdk.javadoc.doclet.StandardDoclet;
@@ -46,7 +46,7 @@ public class DocletRunner extends StandardDoclet {
 
   @Override
   public void init(Locale locale, Reporter reporter) {
-    Logger.set(new DocletErrorReporter(reporter, LogLevel.INFO));
+     Logger.set(new DocletErrorReporter(reporter, LogLevel.INFO));
   }
 
   @Override
@@ -96,6 +96,7 @@ public class DocletRunner extends StandardDoclet {
     // save result
     try {
       Writer writer = new JsonWriter();
+      Logger.get().info("Output json: " + config.getOutputDirectory() + "/" + config.getOutputFileName());
       writer.write(project, new File(config.getOutputDirectory(), config.getOutputFileName()));
     }
     catch (Exception e) {
@@ -112,7 +113,12 @@ public class DocletRunner extends StandardDoclet {
 
   @Override
   public Set<Option> getSupportedOptions() {
-    Set<Doclet.Option> options = new HashSet<>();
+    // include the default javadoc parameters as well
+    Set<Option> options = new HashSet<>(super.getSupportedOptions());
+
+    Optional<Option> option = options.stream().filter(o -> o.getNames().get(0).equals(OPTION_DIRECTORY)).findFirst();
+    option.ifPresent(options::remove);
+
     options.add(new StandardOption(OPTION_DIRECTORY) {
       @Override
       public boolean process(String option, List<String> args) {
@@ -156,8 +162,6 @@ public class DocletRunner extends StandardDoclet {
       }
     });
 
-    // include the default javadoc parameters as well
-    options.addAll(super.getSupportedOptions());
     return options;
   }
 
