@@ -96,6 +96,7 @@ public class DocletConverter {
         }
       }
     }
+
     // find methods
     for (ExecutableElement methodDoc : ElementFilter.methodsIn(originalTypeElement.getEnclosedElements())) {
       ReflectMethod method = convertMethod(docletEnvironment, methodDoc, reflectClasses);

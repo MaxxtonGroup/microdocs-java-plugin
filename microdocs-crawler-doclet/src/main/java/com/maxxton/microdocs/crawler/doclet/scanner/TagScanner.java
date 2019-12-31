@@ -42,7 +42,7 @@ public class TagScanner extends SimpleDocTreeVisitor<Void, Void> {
 
   @Override
   public Void visitParam(ParamTree node, Void aVoid) {
-    tags.put(node.getTagName(), new ReflectDescriptionTag(node.getTagName(), node.getName().getName().toString(), node.getDescription().stream().map(Object::toString).collect(Collectors.joining())));
+    tags.put(node.getName().getName().toString(), new ReflectDescriptionTag(node.getTagName(), node.getName().getName().toString(), node.getDescription().stream().map(Object::toString).collect(Collectors.joining())));
     return super.visitParam(node, aVoid);
   }
 
