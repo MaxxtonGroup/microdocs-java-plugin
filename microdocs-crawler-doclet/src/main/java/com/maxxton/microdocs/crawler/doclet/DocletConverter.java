@@ -19,7 +19,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.SimpleTypeVisitor9;
 
 import com.maxxton.microdocs.core.reflect.ClassType;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
@@ -222,6 +224,22 @@ public class DocletConverter {
           }
         }
       }
+      return genericClass;
+    }
+    else if (type instanceof TypeVariable) {
+      final ReflectClass<TypeVariable> reflectClass = new ReflectClass<>();
+      SimpleTypeVisitor9<Void, Void> genericTypeVisitor = new SimpleTypeVisitor9<>() {
+        @Override
+        public Void visitTypeVariable(TypeVariable t, Void aVoid) {
+          // name will be something as T
+          reflectClass.setName(t.asElement().getSimpleName().toString());
+          return super.visitTypeVariable(t, aVoid);
+        }
+      };
+
+      genericTypeVisitor.visit(type);
+      genericClass.setClassType(reflectClass);
+      reflectClass.setSimpleName(element.getSimpleName().toString());
       return genericClass;
     }
     else if (type.getKind().isPrimitive()) {
