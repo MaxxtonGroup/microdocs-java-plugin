@@ -17,6 +17,7 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -203,6 +204,31 @@ public class DocletConverter {
     }
 
     ReflectGenericClass genericClass = new ReflectGenericClass();
+
+    // Check for arrays
+    SimpleTypeVisitor9<Void, Void> arrayVisitor = new SimpleTypeVisitor9<>() {
+      @Override
+      public Void visitArray(ArrayType t, Void aVoid) {
+        genericClass.setArray(true);
+        TypeElement typeElement = (TypeElement) docletEnvironment.getTypeUtils().asElement(t.getComponentType());
+        if (typeElement != null) {
+          @SuppressWarnings("unchecked")
+          ReflectClass<TypeElement> reflectClass = (ReflectClass<TypeElement>) convertGenericClass(docletEnvironment, t.getComponentType(), reflectClasses).getClassType();
+          genericClass.setClassType(reflectClass);
+        }
+        else {
+          ReflectClass<Void> reflectClass = new ReflectClass<>();
+          reflectClass.setName(t.toString());
+          reflectClass.setSimpleName(t.toString());
+          genericClass.setClassType(reflectClass);
+        }
+        return super.visitArray(t, aVoid);
+      }
+    };
+
+    arrayVisitor.visit(type);
+
+
     Element element = docletEnvironment.getTypeUtils().asElement(type);
     // this could be TypeVar variables too, such as T, K, E
     if (!type.getKind().isPrimitive() && element instanceof TypeElement) {
@@ -224,7 +250,6 @@ public class DocletConverter {
           }
         }
       }
-      return genericClass;
     }
     else if (type instanceof TypeVariable) {
       final ReflectClass<TypeVariable> reflectClass = new ReflectClass<>();
@@ -240,7 +265,6 @@ public class DocletConverter {
       genericTypeVisitor.visit(type);
       genericClass.setClassType(reflectClass);
       reflectClass.setSimpleName(element.getSimpleName().toString());
-      return genericClass;
     }
     else if (type.getKind().isPrimitive()) {
       // use the scanner to figure out what primitive type
@@ -251,9 +275,8 @@ public class DocletConverter {
       reflectClass.setName(result.get(0).name().toLowerCase());
       reflectClass.setSimpleName(result.get(0).name().toLowerCase());
       genericClass.setClassType(reflectClass);
-      return genericClass;
     }
-    return null;
+    return genericClass;
   }
 
   /**

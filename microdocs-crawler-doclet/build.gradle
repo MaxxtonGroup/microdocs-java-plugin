@@ -11,7 +11,7 @@ dependencies {
   api gradleApi()
   api 'org.codehaus.groovy:groovy-all:2.5.8'
   api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
-  api("com.maxxton:microdocs-core-java:2.0.0-beta.1")
+  api("com.maxxton:microdocs-core-java:2.0.0-beta.2")
   api("junit:junit:4.12")
 }
 
