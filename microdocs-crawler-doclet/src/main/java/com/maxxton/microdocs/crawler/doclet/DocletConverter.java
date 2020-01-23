@@ -210,8 +210,7 @@ public class DocletConverter {
       @Override
       public Void visitArray(ArrayType t, Void aVoid) {
         genericClass.setArray(true);
-        TypeElement typeElement = (TypeElement) docletEnvironment.getTypeUtils().asElement(t.getComponentType());
-        if (typeElement != null) {
+        if (docletEnvironment.getTypeUtils().asElement(t.getComponentType()) instanceof TypeElement) {
           @SuppressWarnings("unchecked")
           ReflectClass<TypeElement> reflectClass = (ReflectClass<TypeElement>) convertGenericClass(docletEnvironment, t.getComponentType(), reflectClasses).getClassType();
           genericClass.setClassType(reflectClass);
@@ -225,9 +224,7 @@ public class DocletConverter {
         return super.visitArray(t, aVoid);
       }
     };
-
     arrayVisitor.visit(type);
-
 
     Element element = docletEnvironment.getTypeUtils().asElement(type);
     // this could be TypeVar variables too, such as T, K, E
