@@ -7,31 +7,31 @@ import java.util.List;
  */
 public class SchemaGenericObject {
 
-    private String name;
-    private String simpleName;
-    private List<SchemaGenericObject> generic;
+  private String name;
+  private String simpleName;
+  private List<SchemaGenericObject> generic;
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getSimpleName() {
-        return simpleName;
-    }
+  public String getSimpleName() {
+    return simpleName;
+  }
 
-    public void setSimpleName(String simpleName) {
-        this.simpleName = simpleName;
-    }
+  public void setSimpleName(String simpleName) {
+    this.simpleName = simpleName;
+  }
 
-    public List<SchemaGenericObject> getGeneric() {
-        return generic;
-    }
+  public List<SchemaGenericObject> getGeneric() {
+    return generic;
+  }
 
-    public void setGeneric(List<SchemaGenericObject> generic) {
-        this.generic = generic;
-    }
+  public void setGeneric(List<SchemaGenericObject> generic) {
+    this.generic = generic;
+  }
 }

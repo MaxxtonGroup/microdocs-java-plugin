@@ -8,7 +8,6 @@ import com.maxxton.microdocs.core.collector.SchemaCollector;
 import com.maxxton.microdocs.core.collector.SchemaParser;
 import com.maxxton.microdocs.core.domain.schema.Schema;
 import com.maxxton.microdocs.core.domain.schema.SchemaObject;
-import com.maxxton.microdocs.core.domain.schema.SchemaPrimitive;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotation;
 import com.maxxton.microdocs.core.reflect.ReflectAnnotationValue;
 import com.maxxton.microdocs.core.reflect.ReflectClass;
@@ -50,13 +49,13 @@ public class SpringSchemaCollector extends SchemaCollector {
 
     // JSON
     // Sub types
-    if(schema instanceof SchemaObject) {
+    if (schema instanceof SchemaObject) {
       SchemaObject schemaObject = (SchemaObject) schema;
       reflectClass.getAnnotations().stream().filter(annotation -> annotation.getName().equals(JSON_SUB_TYPES)).forEach(annotation -> {
         List<ReflectAnnotationValue> values = annotation.getList("value");
         if (values != null) {
           values.stream().filter(value -> value.getAnnotation() != null && value.getAnnotation().getName().equals("com.fasterxml.jackson.annotation.JsonSubTypes.Type")).forEach(value -> {
-            ReflectClass clazz = value.getAnnotation().getClazz("value");
+            ReflectClass<?> clazz = value.getAnnotation().getClazz("value");
             if (clazz != null) {
               postViews.put(clazz.getName(), view);
               SchemaObject schemaRef = new SchemaObject();
@@ -69,16 +68,16 @@ public class SpringSchemaCollector extends SchemaCollector {
     }
 
     // Check if it is an entity class
-    boolean isEntity = reflectClass.getAnnotations().stream().filter(annotation -> {
+    boolean isEntity = reflectClass.getAnnotations().stream().anyMatch(annotation -> {
       for (String entityType : SCHEMA_TYPES) {
         if (entityType.equals(annotation.getName())) {
           return true;
         }
       }
       return false;
-    }).count() > 0;
+    });
     if (isEntity) {
-      List<String> tables = new ArrayList();
+      List<String> tables = new ArrayList<>();
       for (String type : TABLE_TYPES) {
         if (reflectClass.getAnnotation(type) != null && reflectClass.getAnnotation(type).getString("name") != null && !reflectClass.getAnnotation(type).getString("name").isEmpty()) {
           tables.add(reflectClass.getAnnotation(type).getString("name").replace("\"", "").toUpperCase());
@@ -120,13 +119,9 @@ public class SpringSchemaCollector extends SchemaCollector {
       }
     });
     // Ignore
-    annotations.stream().filter(annotation -> annotation.getName().equals(TRANSIENT_TYPE)).forEach(annotation -> {
-      mappingsBuilder.relationalIgnore(true);
-    });
+    annotations.stream().filter(annotation -> annotation.getName().equals(TRANSIENT_TYPE)).forEach(annotation -> mappingsBuilder.relationalIgnore(true));
     // Id
-    annotations.stream().filter(annotation -> annotation.getName().equals(ID_TYPE)).forEach(annotation -> {
-      mappingsBuilder.relationalPrimary(true);
-    });
+    annotations.stream().filter(annotation -> annotation.getName().equals(ID_TYPE)).forEach(annotation -> mappingsBuilder.relationalPrimary(true));
 
     // JSON
     // Property
@@ -136,17 +131,13 @@ public class SpringSchemaCollector extends SchemaCollector {
       }
     });
     // Ignore
-    annotations.stream().filter(annotation -> annotation.getName().equals(JSON_IGNORE_TYPE)).forEach(annotation -> {
-      mappingsBuilder.jsonIgnore(true);
-    });
+    annotations.stream().filter(annotation -> annotation.getName().equals(JSON_IGNORE_TYPE)).forEach(annotation -> mappingsBuilder.jsonIgnore(true));
     // View
-    annotations.stream().filter(annotation -> annotation.getName().equals(JSON_VIEW)).forEach(annotation -> {
-      annotation.getList("value").forEach(value -> {
-        if(value.getClazz() != null){
-          mappingsBuilder.view(value.getClazz().getName());
-        }
-      });
-    });
+    annotations.stream().filter(annotation -> annotation.getName().equals(JSON_VIEW)).forEach(annotation -> annotation.getList("value").forEach(value -> {
+      if (value.getClazz() != null) {
+        mappingsBuilder.view(value.getClazz().getName());
+      }
+    }));
 
     fieldSchema.setMappings(mappingsBuilder.build());
 

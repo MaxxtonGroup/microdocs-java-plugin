@@ -5,6 +5,4 @@ package com.maxxton.microdocs.core.domain.schema;
  */
 public class SchemaDummy extends Schema{
 
-
-
 }

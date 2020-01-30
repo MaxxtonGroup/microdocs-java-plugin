@@ -8,49 +8,49 @@ import java.util.List;
  */
 public class ReflectField extends ReflectDoc {
 
-    private List<ReflectAnnotation> annotations = new ArrayList();
-    private ReflectGenericClass type;
-    private String defaultValue;
-    private boolean isStatic;
-    private boolean isPublic;
+  private List<ReflectAnnotation> annotations = new ArrayList<>();
+  private ReflectGenericClass type;
+  private String defaultValue;
+  private boolean isStatic;
+  private boolean isPublic;
 
-    public List<ReflectAnnotation> getAnnotations() {
-        return annotations;
-    }
+  public List<ReflectAnnotation> getAnnotations() {
+    return annotations;
+  }
 
-    public void setAnnotations(List<ReflectAnnotation> annotations) {
-        this.annotations = annotations;
-    }
+  public void setAnnotations(List<ReflectAnnotation> annotations) {
+    this.annotations = annotations;
+  }
 
-    public ReflectGenericClass getType() {
-        return type;
-    }
+  public ReflectGenericClass getType() {
+    return type;
+  }
 
-    public void setType(ReflectGenericClass type) {
-        this.type = type;
-    }
+  public void setType(ReflectGenericClass type) {
+    this.type = type;
+  }
 
-    public String getDefaultValue() {
-        return defaultValue;
-    }
+  public String getDefaultValue() {
+    return defaultValue;
+  }
 
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
+  }
 
-    public boolean isStatic() {
-        return isStatic;
-    }
+  public boolean isStatic() {
+    return isStatic;
+  }
 
-    public void setStatic(boolean aStatic) {
-        isStatic = aStatic;
-    }
+  public void setStatic(boolean aStatic) {
+    isStatic = aStatic;
+  }
 
-    public boolean isPublic() {
-        return isPublic;
-    }
+  public boolean isPublic() {
+    return isPublic;
+  }
 
-    public void setPublic(boolean aPublic) {
-        isPublic = aPublic;
-    }
+  public void setPublic(boolean aPublic) {
+    isPublic = aPublic;
+  }
 }

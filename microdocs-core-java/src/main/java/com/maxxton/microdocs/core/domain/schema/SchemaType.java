@@ -8,25 +8,25 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum SchemaType {
 
-    ENUM,
-    OBJECT,
-    ARRAY,
-    STRING,
-    NUMBER,
-    INTEGER,
-    BOOLEAN,
-    DATE,
-    DUMMY,
-    ANY;
+  ENUM,
+  OBJECT,
+  ARRAY,
+  STRING,
+  NUMBER,
+  INTEGER,
+  BOOLEAN,
+  DATE,
+  DUMMY,
+  ANY;
 
-    @JsonCreator
-    public static SchemaType fromString(String key) {
-        return key == null ? null : SchemaType.valueOf(key.toUpperCase());
-    }
+  @JsonCreator
+  public static SchemaType fromString(String key) {
+    return key == null ? null : SchemaType.valueOf(key.toUpperCase());
+  }
 
-    @JsonValue
-    public String getKey() {
-        return name().toLowerCase();
-    }
+  @JsonValue
+  public String getKey() {
+    return name().toLowerCase();
+  }
 
 }

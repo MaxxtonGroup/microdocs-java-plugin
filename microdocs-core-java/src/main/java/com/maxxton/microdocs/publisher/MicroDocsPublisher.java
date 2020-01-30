@@ -1,5 +1,10 @@
 package com.maxxton.microdocs.publisher;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.mashape.unirest.http.HttpResponse;
@@ -12,11 +17,6 @@ import com.maxxton.microdocs.core.domain.check.CheckProblem;
 import com.maxxton.microdocs.core.domain.check.CheckResponse;
 import com.maxxton.microdocs.core.logging.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 /**
  * Publish or check reports to the MicroDocs server
  *
@@ -27,15 +27,19 @@ public class MicroDocsPublisher {
   /**
    * Publish report on the MicroDocs server
    *
-   * @param microDocsReport
-   * @param projectName
-   * @param groupName
-   * @param version
-   * @param configuration
+   * @param configuration the config object
+   * @param microDocsReport the report
+   * @param projectName the current project name
+   * @param groupName the group name
+   * @param version the version of the api
+   * @param failOnProblems fail in case of compatibility problems
+   * @param env current environment
+   *
    * @return check response
-   * @throws IOException
+   * @throws IOException possible IO exception when file is not found
    */
-  public static CheckResponse publishProject(ServerConfiguration configuration, File microDocsReport, String projectName, String groupName, String version, boolean failOnProblems, String env) throws IOException {
+  public static CheckResponse publishProject(ServerConfiguration configuration, File microDocsReport, String projectName, String groupName, String version, boolean failOnProblems, String env)
+      throws IOException {
     String report = loadReport(microDocsReport);
 
     String url = configuration.getUrl() + "/api/v1/projects/" + URLParamEncoder.encode(projectName);
@@ -43,30 +47,27 @@ public class MicroDocsPublisher {
     initObjectMapper();
     HttpResponse<CheckResponse> response = null;
     try {
-      HttpRequestWithBody request = Unirest.put(configuration.getUrl() + "/api/v1/projects/" + URLParamEncoder.encode(projectName))
-          .queryString("failOnProblems", failOnProblems)
-          .header("content-type", "application/json")
-          .header("accept", "application/json");
+      HttpRequestWithBody request = Unirest.put(configuration.getUrl() + "/api/v1/projects/" + URLParamEncoder.encode(projectName)).queryString("failOnProblems", failOnProblems)
+          .header("content-type", "application/json").header("accept", "application/json");
       if (groupName != null && !groupName.trim().isEmpty()) {
         request = request.queryString("group", groupName);
       }
       if (version != null && !version.trim().isEmpty()) {
         request = request.queryString("version", version);
       }
-      if(configuration.getUsername() != null && configuration.getPassword() != null){
+      if (configuration.getUsername() != null && configuration.getPassword() != null) {
         request = request.basicAuth(configuration.getUsername(), configuration.getPassword());
       }
-      if(env != null && !env.trim().isEmpty()){
+      if (env != null && !env.trim().isEmpty()) {
         request = request.queryString("env", env);
       }
 
-      response = request
-          .body(report)
-          .asObject(CheckResponse.class);
+      response = request.body(report).asObject(CheckResponse.class);
       if (response.getStatus() != 200) {
         throw new IOException("Wrong response status " + response.getStatus() + ", expected 200");
       }
-    } catch (UnirestException e) {
+    }
+    catch (UnirestException e) {
       throw new IOException("Failed to send http request: POST " + url, e);
     }
     return response.getBody();
@@ -75,9 +76,13 @@ public class MicroDocsPublisher {
   /**
    * Check report at the MicroDocs server for problems
    *
-   * @param microDocsReport
-   * @param configuration
+   * @param microDocsReport the report
+   * @param configuration configuration server
+   * @param projectName the current project name
+   * @param env current environment
+   *
    * @return check response
+   * @throws IOException possible IO exception when file is not found
    */
   public static CheckResponse checkProject(ServerConfiguration configuration, File microDocsReport, String projectName, String env) throws IOException {
     String report = loadReport(microDocsReport);
@@ -87,20 +92,17 @@ public class MicroDocsPublisher {
     initObjectMapper();
     HttpResponse<CheckResponse> response = null;
     try {
-      HttpRequestWithBody request = Unirest.post(configuration.getUrl() + "/api/v1/check")
-          .queryString("project", projectName)
-          .header("content-type", "application/json")
+      HttpRequestWithBody request = Unirest.post(configuration.getUrl() + "/api/v1/check").queryString("project", projectName).header("content-type", "application/json")
           .header("accept", "application/json");
-      if(env != null && !env.trim().isEmpty()){
+      if (env != null && !env.trim().isEmpty()) {
         request = request.queryString("env", env);
       }
-      response = request
-          .body(report)
-          .asObject(CheckResponse.class);
+      response = request.body(report).asObject(CheckResponse.class);
       if (response.getStatus() != 200) {
         throw new IOException("Wrong response status " + response.getStatus() + ", expected 200");
       }
-    } catch (UnirestException e) {
+    }
+    catch (UnirestException e) {
       throw new IOException("Failed to send http request: POST " + url, e);
     }
     return response.getBody();
@@ -126,7 +128,8 @@ public class MicroDocsPublisher {
       public <T> T readValue(String value, Class<T> valueType) {
         try {
           return jacksonObjectMapper.readValue(value, valueType);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
           throw new RuntimeException(e);
         }
       }
@@ -134,7 +137,8 @@ public class MicroDocsPublisher {
       public String writeValue(Object value) {
         try {
           return jacksonObjectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        }
+        catch (JsonProcessingException e) {
           throw new RuntimeException(e);
         }
       }
@@ -143,56 +147,70 @@ public class MicroDocsPublisher {
 
   /**
    * Print check response to console
-   * @param response
-   * @param rootDir
+   *
+   * @param response the response
+   * @param rootDir the rootdir
    * @return succeed or failed
    */
-  public static boolean printCheckResponse(CheckResponse response, File rootDir){
+  public static boolean printCheckResponse(CheckResponse response, File rootDir) {
     boolean hasProblems = !"ok".equalsIgnoreCase(response.getStatus());
     int errorCount = 0;
     int warningCount = 0;
     int noticeCount = 0;
-    if(response.getProblems() != null){
-      for(CheckProblem problem : response.getProblems()){
-        switch(problem.getLevel().toLowerCase()){
-          case "error": errorCount++; break;
-          case "warning": warningCount++; break;
-          case "notice": noticeCount++; break;
+    if (response.getProblems() != null) {
+      for (CheckProblem problem : response.getProblems()) {
+        switch (problem.getLevel().toLowerCase()) {
+          case "error":
+            errorCount++;
+            break;
+          case "warning":
+            warningCount++;
+            break;
+          case "notice":
+            noticeCount++;
+            break;
         }
       }
     }
     String message = "\n";
-    if(errorCount + warningCount + noticeCount > 0){
+    if (errorCount + warningCount + noticeCount > 0) {
       message += "Project contains problems: ";
-      if(errorCount > 0)
-        message += String.valueOf(errorCount) + " error" + (errorCount > 1 ? "s" : "") + ",";
-      if(warningCount > 0)
-        message += String.valueOf(warningCount) + " warning" + (warningCount > 1 ? "s" : "") + ",";
-      if(noticeCount > 0)
-        message += String.valueOf(noticeCount) + " notice" + (noticeCount > 1 ? "s" : "") + ",";
-      if(message.endsWith(","))
-        message = message.substring(0, message.length()-1);
-    }else{
+      if (errorCount > 0) {
+        message += errorCount + " error" + (errorCount > 1 ? "s" : "") + ",";
+      }
+      if (warningCount > 0) {
+        message += warningCount + " warning" + (warningCount > 1 ? "s" : "") + ",";
+      }
+      if (noticeCount > 0) {
+        message += noticeCount + " notice" + (noticeCount > 1 ? "s" : "") + ",";
+      }
+      if (message.endsWith(",")) {
+        message = message.substring(0, message.length() - 1);
+      }
+    }
+    else {
       message += "No problems found";
     }
-    if(hasProblems){
+    if (hasProblems) {
       Logger.get().error(message);
-    }else{
+    }
+    else {
       Logger.get().debug(message);
     }
 
-    if(response.getProblems() != null) {
+    if (response.getProblems() != null) {
       for (CheckProblem problem : response.getProblems()) {
         String msg = "\n";
-        String lineNumber = problem.getLineNumber() > 0 ? ":" + String.valueOf(problem.getLineNumber()) : "";
+        String lineNumber = problem.getLineNumber() > 0 ? ":" + problem.getLineNumber() : "";
         String sourceFile = new File(rootDir, "src/main/java/" + problem.getPath() + lineNumber).getPath();
         msg += sourceFile + ": " + problem.getLevel() + ": " + problem.getMessage();
-        if(problem.getClient() != null){
-          msg += "\nBreaking change detected with " + problem.getClient().getTitle() + " (source: " + problem.getClient().getSourceLink() != null ? problem.getClient().getSourceLink() : problem.getClient().getClassName() + " )";
+        if (problem.getClient() != null) {
+          msg += problem.getClient().getSourceLink();
         }
-        if(hasProblems) {
+        if (hasProblems) {
           Logger.get().error(msg);
-        }else{
+        }
+        else {
           Logger.get().debug(msg);
         }
       }

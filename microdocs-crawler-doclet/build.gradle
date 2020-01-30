@@ -1,33 +1,31 @@
-
-apply plugin: 'groovy'
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven'
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+  mavenCentral()
+  mavenLocal()
 }
 
 dependencies {
-    compile gradleApi()
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
-    compile files("${System.properties['java.home']}/../lib/tools.jar")
-    compile("com.fasterxml.jackson.core:jackson-databind:2.7.5")
-    compile ("com.maxxton:microdocs-core-java:1.9.6")
-    testCompile("junit:junit:4.12")
+  api gradleApi()
+  api 'org.codehaus.groovy:groovy-all:2.5.8'
+  api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
+  api("com.maxxton:microdocs-core-java:2.0.0-beta.2")
+  api("junit:junit:4.12")
 }
 
-group='com.maxxton'
-version = '1.9.6'
+group = 'com.maxxton'
+version = '2.0.0-beta.5'
 
 task fatJar(type: Jar) {
-    manifest {
-        attributes 'Implementation-Title': 'microdocs-crawler-doclet',
-                'Implementation-Version': version
-    }
-    baseName = project.name + '-all'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    include('com/maxxton/**')
-    include('com/fasterxml/**')
-    with jar
+  manifest {
+    attributes 'Implementation-Title': 'microdocs-crawler-doclet', 'Implementation-Version': archiveVersion
+  }
+  archivesBaseName = project.name + '-all'
+  configurations.api.setCanBeResolved(true)
+  from { configurations.api.collect { it.isDirectory() ? it : zipTree(it) } }
+  include('com/maxxton/**')
+  include('com/fasterxml/**')
+  with jar
 }

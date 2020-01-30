@@ -1,17 +1,20 @@
 package com.maxxton.microdocs.crawler.doclet;
 
+import javax.tools.Diagnostic;
+
 import com.maxxton.microdocs.core.logging.LogLevel;
 import com.maxxton.microdocs.core.logging.Logger;
-import com.sun.javadoc.DocErrorReporter;
+
+import jdk.javadoc.doclet.Reporter;
 
 /**
  * @author Steven Hermans
  */
 public class DocletErrorReporter extends Logger {
 
-  private final DocErrorReporter delegate;
+  private final Reporter delegate;
 
-  public DocletErrorReporter(DocErrorReporter errorReporter, LogLevel logLevel) {
+  public DocletErrorReporter(Reporter errorReporter, LogLevel logLevel) {
     this.delegate = errorReporter;
     this.setLevel(logLevel);
   }
@@ -19,28 +22,28 @@ public class DocletErrorReporter extends Logger {
   public void error(String msg) {
     super.error(msg);
     if (getLevel().match(LogLevel.ERROR)) {
-      delegate.printError(msg);
+      delegate.print(Diagnostic.Kind.ERROR, msg);
     }
   }
 
   public void error(String msg, Throwable e) {
     super.error(msg, e);
     if (getLevel().match(LogLevel.ERROR)) {
-      delegate.printError(msg);
+      delegate.print(Diagnostic.Kind.ERROR, msg);
     }
   }
 
   public void info(String msg) {
     super.info(msg);
     if (getLevel().match(LogLevel.INFO)) {
-    delegate.printNotice(msg);
+      delegate.print(Diagnostic.Kind.NOTE, msg);
     }
   }
 
   public void warning(String msg) {
     super.warning(msg);
     if (getLevel().match(LogLevel.WARNING)) {
-    delegate.printWarning(msg);
+      delegate.print(Diagnostic.Kind.WARNING, msg);
     }
   }
 

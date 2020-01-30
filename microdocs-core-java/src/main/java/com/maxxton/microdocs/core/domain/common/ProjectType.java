@@ -8,17 +8,16 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum ProjectType {
 
-    SERVICE, CLIENT, DATABASE, LIBRARY, OTHER;
+  SERVICE, CLIENT, DATABASE, LIBRARY, OTHER;
 
+  @JsonCreator
+  public static ProjectType fromString(String key) {
+    return key == null ? null : ProjectType.valueOf(key.toUpperCase());
+  }
 
-    @JsonCreator
-    public static ProjectType fromString(String key) {
-        return key == null ? null : ProjectType.valueOf(key.toUpperCase());
-    }
-
-    @JsonValue
-    public String getKey() {
-        return name().toLowerCase();
-    }
+  @JsonValue
+  public String getKey() {
+    return name().toLowerCase();
+  }
 
 }

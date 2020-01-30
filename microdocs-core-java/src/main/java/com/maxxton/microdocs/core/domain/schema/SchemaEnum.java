@@ -1,44 +1,44 @@
 package com.maxxton.microdocs.core.domain.schema;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Steven Hermans
  */
 public class SchemaEnum extends Schema {
 
-    @JsonProperty("enum")
-    private List enums;
-    private String name;
-    private String simpleName;
+  @JsonProperty("enum")
+  private List<String> enums;
+  private String name;
+  private String simpleName;
 
-    public SchemaEnum(){
+  public SchemaEnum() {
 
-    }
+  }
 
-    public List getEnums() {
-        return enums;
-    }
+  public List<String> getEnums() {
+    return enums;
+  }
 
-    public void setEnums(List enums) {
-        this.enums = enums;
-    }
+  public void setEnums(List<String> enums) {
+    this.enums = enums;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 
-    public String getSimpleName() {
-        return simpleName;
-    }
+  public String getSimpleName() {
+    return simpleName;
+  }
 
-    public void setSimpleName(String simpleName) {
-        this.simpleName = simpleName;
-    }
+  public void setSimpleName(String simpleName) {
+    this.simpleName = simpleName;
+  }
 }

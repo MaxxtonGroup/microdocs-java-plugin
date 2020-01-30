@@ -5,10 +5,9 @@ package com.maxxton.microdocs.core.domain.schema;
  */
 public class SchemaPrimitive extends Schema {
 
-    public SchemaPrimitive() {
-    }
+  public SchemaPrimitive() { }
 
-    public SchemaPrimitive(SchemaType type){
-        setType(type);
-    }
+  public SchemaPrimitive(SchemaType type) {
+    setType(type);
+  }
 }

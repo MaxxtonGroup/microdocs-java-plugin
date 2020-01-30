@@ -58,7 +58,7 @@ gpg --export-secret-keys -o ~/.gnupg/secring.gpg
 ```
 5, Publish key
 ```bash
-gpg --keyserver hkp://pool.sk-keyservers.net --send-keys {publickeyId}
+gpg --keyserver hkp://pool.sks-keyservers.net --send-keys {publickeyId}
 ```
 6. Create ```gradle.properties``` in the gradle home folder (~/.gradle)
 ~/.gradle/gradle.properties

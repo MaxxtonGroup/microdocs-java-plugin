@@ -35,8 +35,8 @@ import com.maxxton.microdocs.core.reflect.ReflectGenericClass;
  */
 public class SchemaCollector {
 
-  private Map<String, Schema> schemas = new HashMap();
-  protected Map<String, String> postViews = new HashMap();
+  private Map<String, Schema> schemas = new HashMap<>();
+  protected Map<String, String> postViews = new HashMap<>();
 
   private final String[] annotations;
   private final SchemaParser[] schemaParsers;
@@ -48,32 +48,31 @@ public class SchemaCollector {
 
   public Map<String, Schema> collect(List<ReflectClass<?>> classes) {
     // add models by their annotations
-    Map<String, ReflectClass> models = new HashMap();
+    Map<String, ReflectClass<?>> models = new HashMap<>();
     classes.stream().filter(clazz -> clazz.hasAnnotation(annotations) && !schemas.containsKey(getSchemaName(clazz, null))).forEach(clazz -> models.put(clazz.getName(), clazz));
 
     // collect schemas of their models
-    models.entrySet().forEach(entry -> schemas.put(getSchemaName(entry.getValue(), null), collectSchema(entry.getValue(), new ArrayList(), null)));
+    models.forEach((key, value) -> schemas.put(getSchemaName(value, null), collectSchema(value, new ArrayList<>(), null)));
 
     // collect postViews
-    List<Map.Entry<String, String>> entrySet = postViews.entrySet().stream().collect(Collectors.toList());
-    for (int i = 0; i < entrySet.size(); i++) {
-      Map.Entry<String, String> entry = entrySet.get(i);
+    List<Map.Entry<String, String>> entrySet = new ArrayList<>(postViews.entrySet());
+    for (Map.Entry<String, String> entry : entrySet) {
       String className = entry.getKey();
       String view = entry.getValue();
-      ReflectClass matchClass = classes.stream().filter(clazz -> clazz.getName().equals(className)).findFirst().orElse(null);
+      ReflectClass<?> matchClass = classes.stream().filter(clazz -> clazz.getName().equals(className)).findFirst().orElse(null);
       collect(matchClass, view);
     }
 
-    return schemas.entrySet().stream().filter(entry -> !entry.getValue().getType().equals(SchemaType.DUMMY)).collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+    return schemas.entrySet().stream().filter(entry -> !entry.getValue().getType().equals(SchemaType.DUMMY)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  public Schema collect(ReflectClass reflectClass) {
+  public Schema collect(ReflectClass<?> reflectClass) {
     return collect(reflectClass, null);
   }
 
-  public Schema collect(ReflectClass reflectClass, String view) {
+  public Schema collect(ReflectClass<?> reflectClass, String view) {
     if (!schemas.containsKey(getSchemaName(reflectClass, view))) {
-      Schema schema = collectSchema(reflectClass, new ArrayList(), view);
+      Schema schema = collectSchema(reflectClass, new ArrayList<>(), view);
       if (schema.getType() != SchemaType.OBJECT || (schema instanceof SchemaObject && ((SchemaObject) schema).isIgnore())) {
         return schema;
       }
@@ -97,7 +96,7 @@ public class SchemaCollector {
     }
   }
 
-  private Schema collectSchema(ReflectClass reflectClass, List<ReflectGenericClass> genericClasses, String view) {
+  private Schema collectSchema(ReflectClass<?> reflectClass, List<ReflectGenericClass> genericClasses, String view) {
     Logger.get().debug("Collect Schema: " + reflectClass.getName());
     for (SchemaParser schemaParser : schemaParsers) {
       if (schemaParser.getClassName().equals(reflectClass.getName())) {
@@ -137,33 +136,33 @@ public class SchemaCollector {
     schema.setName(reflectClass.getName());
     schema.setSimpleName(reflectClass.getSimpleName());
     schema.setDescription(reflectClass.getDescription().getText());
-    List enums = new ArrayList();
+    List<String> enums = new ArrayList<>();
     reflectClass.getEnumFields().forEach(field -> enums.add(field.getSimpleName()));
     schema.setEnums(enums);
     return schema;
   }
 
-  private Schema collectIntegerSchema(ReflectClass reflectClass) {
+  private Schema collectIntegerSchema(ReflectClass<?> reflectClass) {
     return new SchemaPrimitive(SchemaType.INTEGER);
   }
 
-  private Schema collectNumberSchema(ReflectClass reflectClass) {
+  private Schema collectNumberSchema(ReflectClass<?> reflectClass) {
     return new SchemaPrimitive(SchemaType.NUMBER);
   }
 
-  private Schema collectStringSchema(ReflectClass reflectClass) {
+  private Schema collectStringSchema(ReflectClass<?> reflectClass) {
     return new SchemaPrimitive(SchemaType.STRING);
   }
 
-  private Schema collectBooleanSchema(ReflectClass reflectClass) {
+  private Schema collectBooleanSchema(ReflectClass<?> reflectClass) {
     return new SchemaPrimitive(SchemaType.BOOLEAN);
   }
 
-  private Schema collectDateSchema(ReflectClass reflectClass) {
+  private Schema collectDateSchema(ReflectClass<?> reflectClass) {
     return new SchemaPrimitive(SchemaType.DATE);
   }
 
-  private Schema collectArraySchema(ReflectClass reflectClass, List<ReflectGenericClass> genericClasses, String view) {
+  private Schema collectArraySchema(ReflectClass<?> reflectClass, List<ReflectGenericClass> genericClasses, String view) {
     SchemaArray schema = new SchemaArray();
     schema.setType(SchemaType.ARRAY);
     if (!genericClasses.isEmpty()) {
@@ -194,10 +193,10 @@ public class SchemaCollector {
     schema.setType(SchemaType.OBJECT);
     schema.setName(reflectClass.getSimpleName());
     schema.setGeneric(collectGeneric(genericClasses));
-    Map<String, Schema> properties = new HashMap();
+    Map<String, Schema> properties = new HashMap<>();
 
     // Collect getter and setters
-    Map<String, PropertyBucket> propertyBuckets = new HashMap();
+    Map<String, PropertyBucket> propertyBuckets = new HashMap<>();
     reflectClass.getDeclaredMethods().stream()
         .filter(method -> method.getSimpleName().startsWith("is") || method.getSimpleName().startsWith("has") || method.getSimpleName().startsWith("get") || method.getSimpleName().startsWith("set"))
         .forEach(method -> {
@@ -249,7 +248,7 @@ public class SchemaCollector {
 
     if (reflectClass.getSuperClass() != null && reflectClass.getSuperClass().getClassType() != null && !Object.class.getName().equals(reflectClass.getSuperClass().getClassType().getName())) {
       Schema superSchema = collect(reflectClass.getSuperClass(), view);
-      List<Schema> superList = new ArrayList();
+      List<Schema> superList = new ArrayList<>();
       superList.add(superSchema);
       schema.setAllOf(superList);
     }
@@ -261,7 +260,7 @@ public class SchemaCollector {
     if (genericClasses.isEmpty()) {
       return null;
     }
-    List<SchemaGenericObject> generics = new ArrayList();
+    List<SchemaGenericObject> generics = new ArrayList<>();
     for (ReflectGenericClass clazz : genericClasses) {
       SchemaGenericObject generic = new SchemaGenericObject();
       generic.setName(clazz.getClassType().getName());
@@ -309,15 +308,15 @@ public class SchemaCollector {
     return true;
   }
 
-  protected String getSchemaName(ReflectClass reflectClass, String view) {
+  protected String getSchemaName(ReflectClass<?> reflectClass, String view) {
     return reflectClass.getName() + (view != null ? "#" + view : "");
   }
 
-  private class PropertyBucket {
+  private static class PropertyBucket {
 
     private ReflectGenericClass type;
-    private List<ReflectAnnotation> annotations = new ArrayList();
-    private List<ReflectDescription> descriptions = new ArrayList();
+    private List<ReflectAnnotation> annotations = new ArrayList<>();
+    private List<ReflectDescription> descriptions = new ArrayList<>();
 
     public ReflectGenericClass getType() {
       return type;
@@ -336,11 +335,9 @@ public class SchemaCollector {
             break;
           }
         }
-        List<ReflectDescriptionTag> tags = new ArrayList();
+        List<ReflectDescriptionTag> tags = new ArrayList<>();
         descriptions.forEach(description -> {
-          description.getTags().forEach(tag -> {
-            tags.add(tag);
-          });
+          tags.addAll(description.getTags());
         });
         desc.setTags(tags);
       }

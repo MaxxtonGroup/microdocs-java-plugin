@@ -68,10 +68,11 @@ public class Logger {
 
   public void logEndpoint(String method, String path) {
     if(level.match(LogLevel.INFO)) {
-      method = "[" + method + "]";
-      while (method.length() < 8) {
-        method += " ";
+      StringBuilder methodBuilder = new StringBuilder("[" + method + "]");
+      while (methodBuilder.length() < 8) {
+        methodBuilder.append(" ");
       }
+      method = methodBuilder.toString();
       System.out.println(ANSI_BLUE + method + " " + path + ANSI_RESET);
     }
   }
