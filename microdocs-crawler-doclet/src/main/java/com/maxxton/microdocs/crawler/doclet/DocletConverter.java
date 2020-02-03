@@ -69,7 +69,7 @@ public class DocletConverter {
   private static void updateClass(DocletEnvironment docletEnvironment, ReflectClass<TypeElement> reflectClass, List<ReflectClass<TypeElement>> reflectClasses) {
     TypeElement originalTypeElement = reflectClass.getOriginal();
     // find super class
-    if (originalTypeElement.getSuperclass() != null) {
+    if (originalTypeElement.getSuperclass() != null && !originalTypeElement.getSuperclass().getKind().equals(TypeKind.NONE)) {
       reflectClass.setSuperClass(convertGenericClass(docletEnvironment, originalTypeElement.getSuperclass(), reflectClasses));
     }
     // find interfaces
@@ -199,7 +199,7 @@ public class DocletConverter {
 
   private static ReflectGenericClass convertGenericClass(DocletEnvironment docletEnvironment, TypeMirror type, List<ReflectClass<TypeElement>> reflectClasses) {
     // type could be void too
-    if (type.toString().equals("void")) {
+    if (type.getKind().equals(TypeKind.VOID) || type.getKind().equals(TypeKind.WILDCARD)) {
       return null;
     }
 
