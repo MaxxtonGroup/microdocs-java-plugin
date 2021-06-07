@@ -124,7 +124,7 @@ public class PathCollector implements Collector<PathBuilder> {
     }
 
     // Ignore regex in path parameters
-    path = path.replaceAll("\\{.*?(:.*?)}", "");
+    path = path.replaceAll("\\{(.+)(:.*?)}", "{$1}");
     String finalPath = path;
 
     // find methods
