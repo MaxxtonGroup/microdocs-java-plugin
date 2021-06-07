@@ -21,7 +21,7 @@ dependencies {
   api gradleApi()
   api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
   api("com.mashape.unirest:unirest-java:1.4.9")
-  api("com.maxxton:microdocs-core-java:2.0.0")
+  api("com.maxxton:microdocs-core-java:2.0.1")
 }
 
 group = 'com.maxxton'

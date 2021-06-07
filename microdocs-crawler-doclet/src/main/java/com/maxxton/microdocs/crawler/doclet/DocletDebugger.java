@@ -10,6 +10,8 @@ import javax.tools.ToolProvider;
 /**
  * Test class for running the doclet
  *
+ * Usage: /my/path/workorder-service/build/tmp/javadoc/javadoc.options
+ *
  * @author Steven Hermans
  */
 public class DocletDebugger {
