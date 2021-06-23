@@ -71,10 +71,10 @@ uploadArchives {
       beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
       // switch local with remote repo for local development
-//      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-//        authentication(userName: sonatypeUsername, password: sonatypePassword)
-//      }
-      repository(url: mavenLocal().url)
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: sonatypeUsername, password: sonatypePassword)
+      }
+//      repository(url: mavenLocal().url)
 
       pom.project {
         name 'MicroDocs Gradle Crawler'
