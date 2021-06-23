@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -29,6 +31,7 @@ import jdk.javadoc.doclet.Reporter;
 import jdk.javadoc.doclet.StandardDoclet;
 
 import static com.maxxton.microdocs.crawler.doclet.Configuration.OPTION_CRAWLER;
+import static com.maxxton.microdocs.crawler.doclet.Configuration.OPTION_CUSTOM_LIBRARIES;
 import static com.maxxton.microdocs.crawler.doclet.Configuration.OPTION_DIRECTORY;
 import static com.maxxton.microdocs.crawler.doclet.Configuration.OPTION_FILENAME;
 import static com.maxxton.microdocs.crawler.doclet.Configuration.OPTION_GROUP;
@@ -42,7 +45,7 @@ import static com.maxxton.microdocs.crawler.doclet.Configuration.OPTION_VERSION;
  */
 public class DocletRunner extends StandardDoclet {
 
-  private static Configuration config = new Configuration();
+  private static final Configuration config = new Configuration();
 
   @Override
   public void init(Locale locale, Reporter reporter) {
@@ -55,7 +58,7 @@ public class DocletRunner extends StandardDoclet {
 
     // get crawler
     Crawler crawler = null;
-    if ("spring".equals(config.getCrawler().toLowerCase())) {
+    if ("spring".equalsIgnoreCase(config.getCrawler())) {
       crawler = new SpringCrawler();
     }
 
@@ -68,8 +71,14 @@ public class DocletRunner extends StandardDoclet {
     Set<TypeElement> typeElements = ElementFilter.typesIn(specifiedElements);
     List<ReflectClass<?>> classes = DocletConverter.convert(docletEnvironment, new ArrayList<>(typeElements));
 
+    // create a list of library refs
+    List<String> libraryList = new ArrayList<>();
+    if (config.getCustomLibraries() != null) {
+      libraryList = Stream.of(config.getCustomLibraries().split(",")).map(String::trim).collect(Collectors.toList());
+    }
+
     // run crawler
-    Project project = crawler.crawl(classes);
+    Project project = crawler.crawl(classes, libraryList);
 
     // add projectName if present
     if (config.getProjectName() != null) {
@@ -91,6 +100,14 @@ public class DocletRunner extends StandardDoclet {
         project.setInfo(new ProjectInfo());
       }
       project.getInfo().setGroup(config.getGroup());
+    }
+
+    // add libraries if present
+    if (config.getCustomLibraries() != null) {
+      if (project.getInfo() == null) {
+        project.setInfo(new ProjectInfo());
+      }
+      project.getInfo().setLibraries(config.getCustomLibraries());
     }
 
     // save result
@@ -158,6 +175,13 @@ public class DocletRunner extends StandardDoclet {
       @Override
       public boolean process(String option, List<String> args) {
         config.setProjectName(stripParameterValue(args.get(0)));
+        return true;
+      }
+    });
+    options.add(new StandardOption(OPTION_CUSTOM_LIBRARIES) {
+      @Override
+      public boolean process(String option, List<String> args) {
+        config.setCustomLibraries(stripParameterValue(args.get(0)));
         return true;
       }
     });

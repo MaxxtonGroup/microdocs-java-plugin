@@ -12,7 +12,7 @@ import com.maxxton.microdocs.core.domain.common.ProjectType;
  */
 public class ProjectInfoBuilder implements Builder<ProjectInfo> {
 
-  private ProjectInfo projectInfo = new ProjectInfo();
+  private final ProjectInfo projectInfo = new ProjectInfo();
 
   @Override
   public ProjectInfo build() {

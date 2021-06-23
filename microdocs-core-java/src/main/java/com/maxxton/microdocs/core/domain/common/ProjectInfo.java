@@ -14,6 +14,7 @@ public class ProjectInfo {
   private License license;
   private String version;
   private String latestVersion;
+  private String libraries;
 
   public ProjectType getType() {
     return type;
@@ -85,5 +86,13 @@ public class ProjectInfo {
 
   public void setLatestVersion(String latestVersion) {
     this.latestVersion = latestVersion;
+  }
+
+  public String getLibraries() {
+    return libraries;
+  }
+
+  public void setLibraries(String libraries) {
+    this.libraries = libraries;
   }
 }

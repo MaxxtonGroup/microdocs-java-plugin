@@ -3,6 +3,7 @@ apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'maven-publish'
 
 buildscript {
   repositories {
@@ -21,11 +22,11 @@ dependencies {
   api gradleApi()
   api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
   api("com.mashape.unirest:unirest-java:1.4.9")
-  api("com.maxxton:microdocs-core-java:2.0.1")
+  api("com.maxxton:microdocs-core-java:2.0.4")
 }
 
 group = 'com.maxxton'
-version = '2.0.1'
+version = '2.0.4'
 
 
 task fatJar(type: Jar, dependsOn: 'jar') {
@@ -70,10 +71,10 @@ uploadArchives {
       beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
       // switch local with remote repo for local development
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: sonatypeUsername, password: sonatypePassword)
-      }
-//      repository(url: mavenLocal().url)
+//      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//        authentication(userName: sonatypeUsername, password: sonatypePassword)
+//      }
+      repository(url: mavenLocal().url)
 
       pom.project {
         name 'MicroDocs Gradle Crawler'

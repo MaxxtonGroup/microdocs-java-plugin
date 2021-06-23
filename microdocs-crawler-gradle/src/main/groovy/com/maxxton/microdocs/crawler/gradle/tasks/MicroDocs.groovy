@@ -18,6 +18,7 @@ class MicroDocs extends Javadoc {
       options.addStringOption("apiVersion", version)
     else
       options.addStringOption("apiVersion", "develop")
+
     super.generate()
   }
 }
