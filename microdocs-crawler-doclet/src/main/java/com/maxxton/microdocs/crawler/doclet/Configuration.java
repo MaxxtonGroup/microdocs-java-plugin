@@ -13,6 +13,7 @@ public class Configuration {
   static final String OPTION_VERSION = "-apiVersion";
   static final String OPTION_GROUP = "-group";
   static final String OPTION_PROJECT_NAME = "-projectName";
+  static final String OPTION_CUSTOM_LIBRARIES = "-customLibraries";
   private static final String DEFAULT_DIRECTORY = ".";
   private static final String DEFAULT_FILENAME = "./microdocs.json";
   private static final String DEFAULT_CRAWLER = "spring";
@@ -23,6 +24,7 @@ public class Configuration {
   private String version;
   private String group;
   private String projectName;
+  private String customLibraries;
 
   void setOutputDirectory(String outputDirectory) {
     this.outputDirectory = outputDirectory;
@@ -48,6 +50,10 @@ public class Configuration {
     this.projectName = projectName;
   }
 
+  void setCustomLibraries(String customLibraries) {
+    this.customLibraries = customLibraries;
+  }
+
   String getOutputDirectory() {
     return outputDirectory != null ? outputDirectory : DEFAULT_DIRECTORY;
   }
@@ -70,6 +76,10 @@ public class Configuration {
 
   String getProjectName() {
     return projectName;
+  }
+
+  String getCustomLibraries() {
+    return customLibraries;
   }
 
 }

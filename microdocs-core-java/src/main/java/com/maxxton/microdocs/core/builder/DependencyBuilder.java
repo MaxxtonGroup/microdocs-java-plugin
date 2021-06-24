@@ -16,7 +16,7 @@ import com.maxxton.microdocs.core.reflect.ReflectClass;
 public class DependencyBuilder implements Builder<Dependency> {
 
   private String title;
-  private Dependency dependency = new Dependency();
+  private final Dependency dependency = new Dependency();
 
   public String title() {
     return title;
