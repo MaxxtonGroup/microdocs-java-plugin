@@ -1,6 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'java-library'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 repositories {
   mavenCentral()
@@ -11,12 +11,12 @@ dependencies {
   api gradleApi()
   api 'org.codehaus.groovy:groovy-all:2.5.8'
   api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
-  api("com.maxxton:microdocs-core-java:2.0.4")
+  api("com.maxxton:microdocs-core-java:3.0.0")
   api("junit:junit:4.12")
 }
 
 group = 'com.maxxton'
-version = '2.0.4'
+version = '3.0.0'
 
 task fatJar(type: Jar) {
   manifest {
