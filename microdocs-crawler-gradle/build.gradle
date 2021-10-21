@@ -61,8 +61,14 @@ artifacts {
   archives sourcesJar
 }
 
+java {
+  withJavadocJar()
+  withSourcesJar()
+}
+
 signing {
   sign configurations.archives
+  sign publishing.publications
 }
 
 publishing {
