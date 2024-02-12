@@ -67,8 +67,8 @@ class MicroDocsCrawlerPlugin implements Plugin<Project> {
 
     project.task('microDocs', type: Zip, dependsOn: ['buildMicroDocs', 'buildJavadoc', 'exportVersion'], group: 'microdocs') {
       from project.reporting.file("./")
-      baseName = "microdocs"
-      version = "latest";
+      archiveBaseName = "microdocs"
+      archiveVersion = "latest";
     }
 
     project.task('exportVersion', group: 'microdocs') {

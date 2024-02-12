@@ -25,13 +25,12 @@ dependencies {
 }
 
 group = 'com.maxxton'
-version = '3.0.0'
+version = '4.0.0'
 
 
 task fatJar(type: Jar, dependsOn: 'jar') {
   archiveBaseName = project.name
-  configurations.api.setCanBeResolved(true)
-  from { configurations.api.collect { it.isDirectory() ? it : zipTree(it) } }
+  from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
   include('com/maxxton/**')
   include('com/fasterxml/**')
   include('com/mashape/**')
@@ -40,8 +39,12 @@ task fatJar(type: Jar, dependsOn: 'jar') {
   with jar
 }
 
-manifest {
-  attributes 'Implementation-Title': 'microdocs-crawler-gradle', 'Implementation-Version': version
+java {
+  // XXX: the manifest is not included in javadocJar, sourcesJar, nor fatJar.
+  // Whether this is inteded is lost to time...
+  manifest {
+    attributes 'Implementation-Title': 'microdocs-crawler-gradle', 'Implementation-Version': version
+  }
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {

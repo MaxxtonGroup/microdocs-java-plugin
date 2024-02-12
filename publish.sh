@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
-# publish core
-echo "* publish core *"
+set -e
+
+echo "* [core] publish *"
 cd microdocs-core-java
-./gradlew uploadArchives
+./gradlew clean publishToMavenLocal --warning-mode all --stacktrace
 
-# build doclet
-echo "* build doclet *"
+echo "* [doclet] build *"
 cd ../microdocs-crawler-doclet
-./gradlew fatJar
+./gradlew clean fatJar --warning-mode all --stacktrace
 
-# copy doclet
-echo "* copy doclet *"
-rm -f ../microdocs-crawler-gradle/src/main/resources/microdocs-crawler-doclet.jar
-cp build/libs/microdocs-crawler-doclet-all-1.8.0.jar ../microdocs-crawler-gradle/src/main/resources/microdocs-crawler-doclet.jar
-
-# publish gradle plugin
-echo "* publish gradle plugin *"
+echo "* [plugin] clean *"
 cd ../microdocs-crawler-gradle
-./gradlew uploadArchives
+./gradlew clean --warning-mode all --stacktrace
+
+echo "* [plugin] 'include' doclet *"
+cp ../microdocs-crawler-doclet/build/libs/microdocs-crawler-doclet-all-*.jar src/main/resources/microdocs-crawler-doclet.jar
+
+echo "* [plugin] publish *"
+./gradlew publishToMavenLocal --warning-mode all --stacktrace

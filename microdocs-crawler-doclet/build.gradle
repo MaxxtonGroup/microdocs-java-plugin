@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'maven-publish'
+apply plugin: 'base'
 
 repositories {
   mavenCentral()
@@ -16,15 +17,16 @@ dependencies {
 }
 
 group = 'com.maxxton'
-version = '3.0.0'
+version = '4.0.0'
 
 task fatJar(type: Jar) {
   manifest {
     attributes 'Implementation-Title': 'microdocs-crawler-doclet', 'Implementation-Version': archiveVersion
   }
-  archivesBaseName = project.name + '-all'
-  configurations.api.setCanBeResolved(true)
-  from { configurations.api.collect { it.isDirectory() ? it : zipTree(it) } }
+  base {
+    archivesName = project.name + '-all'
+  }
+  from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
   include('com/maxxton/**')
   include('com/fasterxml/**')
   with jar
