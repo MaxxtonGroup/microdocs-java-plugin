@@ -49,7 +49,8 @@ public class DocletRunner extends StandardDoclet {
 
   @Override
   public void init(Locale locale, Reporter reporter) {
-     Logger.set(new DocletErrorReporter(reporter, LogLevel.INFO));
+    super.init(locale, reporter);
+    Logger.set(new DocletErrorReporter(reporter, LogLevel.INFO));
   }
 
   @Override

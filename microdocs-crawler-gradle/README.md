@@ -34,47 +34,16 @@ publishMicroDocs{
 ```
 
 ## Usage
-* ```gradle microDocs``` - Generate definitions
-* ```gradle checkMicroDocs``` - Check new definitions against the MicroDocs server 
-* ```gradle publishMicroDocs``` - Publish definitions to the MicroDocs server 
+* `gradle microDocs` - Generate definitions
+* `gradle checkMicroDocs` - Check new definitions against the MicroDocs server
+* `gradle publishMicroDocs` - Publish definitions to the MicroDocs server
 
 ## Build
 ```
-# copy the doclet to resources
+# Assuming your start from the README's directory
+cd ../microdocs-crawler-doclet
+./gradlew fatJar
+cd -
 cp ../microdocs-crawler-doclet/build/libs/microdocs-crawler-doclet.jar src/main/resources/microdocs-crawler-doclet.jar
-gradle publishArchives
+./gradlew build
 ```
-
-## Publish to Maven Central
-1. Create a [sonatype account](https://issues.sonatype.org/secure/Signup!default.jspa) and create an issue to request access to com.maxxton
-2. Install [GnuPG](https://www.gnupg.org/download/)
-3. Generate key pair by running:
-```bash
-$ gpg --full-generate-key
-```
-4, Export the key
-```bash
-gpg --export-secret-keys -o ~/.gnupg/secring.gpg
-```
-5, Publish key
-```bash
-gpg --keyserver hkp://pool.sks-keyservers.net --send-keys {publickeyId}
-```
-6. Create ```gradle.properties``` in the gradle home folder (~/.gradle)
-~/.gradle/gradle.properties
-```
-signing.keyId=publickeyid (only the last 8 chars)
-signing.password=yourpassword
-signing.secretKeyRingFile=C:\\Users\\username\\.gnupg\\secring.gpg
-
-sonatypeUsername=username
-sonatypePassword=password
-```
-Fill in these properties correctly.
-
-7. Publish
-```
-$ gradle publishArchives
-```
-
-And follow the [release and deployment manual](http://central.sonatype.org/pages/releasing-the-deployment.html)
