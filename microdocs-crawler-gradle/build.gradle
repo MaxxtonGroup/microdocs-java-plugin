@@ -1,21 +1,57 @@
-apply plugin: 'groovy'
-apply plugin: 'java'
-apply plugin: 'java-library'
-apply plugin: 'signing'
-apply plugin: 'maven-publish'
 
-buildscript {
-  repositories {
-    mavenCentral()
+plugins {
+  id "groovy"
+  id "java"
+  id "java-library"
+  id "signing"
+  id "maven-publish"
+  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.2.0"
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+      pom {
+        name = 'MicroDocs Gradle Crawler'
+        description = 'MicroDocs crawler for gradle projects'
+        url = 'https://github.com/MaxxtonGroup/microdocs'
+        licenses {
+          license {
+            name = 'The Apache Software License, Version 2.0'
+            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution = 'repo'
+          }
+        }
+        developers {
+          developer {
+            id = 's.hermans'
+            name = 'Steven Hermans'
+          }
+        }
+        scm {
+          url = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
+          connection = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
+          developerConnection = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
+        }
+      }
+    }
   }
-  dependencies {
+  repositories {
+    // mavenLocal()
+    maven {
+      url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-registry"
+    }
   }
 }
 
 repositories {
   mavenCentral()
-  mavenLocal()
+  maven {
+    url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-registry"
+  }
 }
+
 
 dependencies {
   api gradleApi()
@@ -72,46 +108,4 @@ java {
 signing {
   sign configurations.archives
   sign publishing.publications
-}
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.java
-      pom {
-        name = 'MicroDocs Gradle Crawler'
-        description = 'MicroDocs crawler for gradle projects'
-        url = 'https://github.com/MaxxtonGroup/microdocs'
-        licenses {
-          license {
-            name = 'The Apache Software License, Version 2.0'
-            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution = 'repo'
-          }
-        }
-        developers {
-          developer {
-            id = 's.hermans'
-            name = 'Steven Hermans'
-          }
-        }
-        scm {
-          url = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
-          connection = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
-          developerConnection = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
-        }
-      }
-    }
-  }
-  repositories {
-    // switch local with remote repo for local development
-    maven {
-      url "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-      credentials {
-        username = sonatypeUsername
-        password = sonatypePassword
-      }
-    }
-//    mavenLocal()
-  }
 }
