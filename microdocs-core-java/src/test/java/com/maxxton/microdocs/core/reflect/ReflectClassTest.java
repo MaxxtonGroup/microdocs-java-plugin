@@ -3,14 +3,16 @@ package com.maxxton.microdocs.core.reflect;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Steven Hermans
  */
 public class ReflectClassTest {
 
-  @org.junit.Test
+  @Test
   public void testHasParent() {
     ReflectClass<ArrayList<?>> arrayListClass = new ReflectClass<>();
     arrayListClass.setSimpleName(ArrayList.class.getSimpleName());
@@ -31,7 +33,7 @@ public class ReflectClassTest {
 
   }
 
-  @org.junit.Test
+  @Test
   public void testHasParentNotLoaded() {
     ReflectClass<ArrayList<?>> arrayListClass = new ReflectClass<>();
     arrayListClass.setSimpleName(ArrayList.class.getSimpleName());
