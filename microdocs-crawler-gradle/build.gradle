@@ -54,18 +54,19 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
   from 'build/docs/javadoc'
 }
 
-// sourcesJar is created automatically by withSourcesJar() below (via the
-// com.maxxton.convention plugin's PublishingConfiguration, which calls it
-// as soon as maven-publish is applied).
+// Registers the sourcesJar task (withJavadocJar() just attaches the
+// existing javadocJar task above). Declared before the artifacts{} block
+// below so both tasks are guaranteed to exist by the time it references
+// them, rather than relying on the com.maxxton.convention plugin having
+// already created sourcesJar earlier via PublishingConfiguration.
+java {
+  withJavadocJar()
+  withSourcesJar()
+}
 
 artifacts {
   archives fatJar
 
   archives javadocJar
   archives sourcesJar
-}
-
-java {
-  withJavadocJar()
-  withSourcesJar()
 }
