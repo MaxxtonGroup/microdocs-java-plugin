@@ -70,3 +70,29 @@ artifacts {
   archives javadocJar
   archives sourcesJar
 }
+
+// Plugin marker so consumers can apply this via the plugins{} DSL / version
+// catalog (id 'com.maxxton.microdocs.crawler'). This marker was historically
+// published only to the Gradle Plugin Portal (4.0.0/4.0.1); self-publishing it
+// to our registry makes new versions resolvable without a portal release. The
+// mavenJava publication (auto-configured by com.maxxton.convention) still
+// publishes the impl jar under com.maxxton:microdocs-crawler-gradle; these are
+// distinct coordinates so they do not clash.
+publishing {
+  publications {
+    pluginMarker(MavenPublication) {
+      groupId = 'com.maxxton.microdocs.crawler'
+      artifactId = 'com.maxxton.microdocs.crawler.gradle.plugin'
+      version = project.version
+      pom {
+        packaging = 'pom'
+        withXml {
+          def dependency = asNode().appendNode('dependencies').appendNode('dependency')
+          dependency.appendNode('groupId', 'com.maxxton')
+          dependency.appendNode('artifactId', 'microdocs-crawler-gradle')
+          dependency.appendNode('version', project.version)
+        }
+      }
+    }
+  }
+}
