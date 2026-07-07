@@ -48,9 +48,8 @@ class MicroDocsCrawlerPlugin implements Plugin<Project> {
 
     project.task('buildMicroDocs', type: MicroDocs, dependsOn: ['extractMicroDocsDoclet'], group: 'microdocs') {
       title = ""
-      project.configurations.api.setCanBeResolved(true)
       source = project.sourceSets.main.allJava
-      classpath = project.configurations.api
+      classpath = project.sourceSets.main.compileClasspath
       destinationDir = project.reporting.file('./')
       options.docletpath = [new File("$project.buildDir/tmp/" + jarName)]
       options.doclet = 'com.maxxton.microdocs.crawler.doclet.DocletRunner'
@@ -58,10 +57,9 @@ class MicroDocsCrawlerPlugin implements Plugin<Project> {
 
     project.task('buildJavadoc', type: Javadoc, group: 'microdocs') {
       title = ""
-      project.configurations.api.setCanBeResolved(true)
       source = project.sourceSets.main.allJava
       destinationDir = project.reporting.file("javadoc")
-      classpath = project.configurations.api
+      classpath = project.sourceSets.main.compileClasspath
       options.tags = ['response', 'example', 'ignoreDownstreamCheck']
     }
 
