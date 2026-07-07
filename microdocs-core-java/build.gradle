@@ -23,10 +23,8 @@ repositories {
 dependencies {
   api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
   api("com.mashape.unirest:unirest-java:1.4.9")
-  testImplementation("junit:junit:4.12")
-  // com.maxxton.convention forces useJUnitPlatform() on all Test tasks;
-  // the vintage engine lets these existing JUnit 4 tests run on it.
-  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
+  testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
