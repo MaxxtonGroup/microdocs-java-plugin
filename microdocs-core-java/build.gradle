@@ -2,50 +2,16 @@
 plugins {
   id "java"
   id "java-library"
-  id "signing"
   id "maven-publish"
-  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.2.0"
+  id "com.maxxton.convention" version "3.3.2"
 }
 
-group = 'com.maxxton'
-version = '4.0.0'
+// group and version come from gradle.properties, set before the
+// com.maxxton.convention plugin's PublishingConfiguration reads them.
 
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.java
-      pom {
-        name = 'MicroDocs Core Java'
-        description = 'MicroDocs core functionalities to share accross various projects'
-        url = 'https://github.com/MaxxtonGroup/microdocs'
-        licenses {
-          license {
-            name = 'The Apache Software License, Version 2.0'
-            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution = 'repo'
-          }
-        }
-        developers {
-          developer {
-            id = 's.hermans'
-            name = 'Steven Hermans'
-          }
-        }
-        scm {
-          url = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
-          connection = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
-          developerConnection = 'scm:git@github.com:MaxxtonGroup/microdocs.git'
-        }
-      }
-    }
-  }
-  repositories {
-    // mavenLocal()
-    maven {
-      url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-registry"
-    }
-  }
-}
+// Publishing (mavenJava publication + maxxton-maven-registry repository) is
+// auto-configured by the com.maxxton.convention plugin once maven-publish
+// and java are detected - see PublishingConfiguration in maxxton-conventions.
 
 repositories {
   mavenCentral()
@@ -58,6 +24,9 @@ dependencies {
   api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
   api("com.mashape.unirest:unirest-java:1.4.9")
   testImplementation("junit:junit:4.12")
+  // com.maxxton.convention forces useJUnitPlatform() on all Test tasks;
+  // the vintage engine lets these existing JUnit 4 tests run on it.
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.2")
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -65,9 +34,14 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
   from 'build/docs/javadoc'
 }
 
-task sourcesJar(type: Jar) {
-  from sourceSets.main.allSource
-  archiveClassifier = "sources"
+// Registers the sourcesJar task (withJavadocJar() just attaches the
+// existing javadocJar task above). Declared before the artifacts{} block
+// below so both tasks are guaranteed to exist by the time it references
+// them, rather than relying on the com.maxxton.convention plugin having
+// already created sourcesJar earlier via PublishingConfiguration.
+java {
+  withJavadocJar()
+  withSourcesJar()
 }
 
 artifacts {
@@ -75,16 +49,6 @@ artifacts {
 
   archives javadocJar
   archives sourcesJar
-}
-
-signing {
-  sign configurations.archives
-  sign publishing.publications
-}
-
-java {
-  withJavadocJar()
-  withSourcesJar()
 }
 
 javadoc {

@@ -3,7 +3,7 @@ package com.maxxton.microdocs.core.domain.schema;
 /**
  * @author Steven Hermans
  */
-public class SchemaPrimitive extends Schema {
+public final class SchemaPrimitive extends Schema {
 
   public SchemaPrimitive() { }
 
