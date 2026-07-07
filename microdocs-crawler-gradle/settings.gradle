@@ -1,1 +1,25 @@
+pluginManagement {
+  repositories {
+    mavenLocal()
+    maven {
+      url = uri("artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-virtual")
+    }
+    gradlePluginPortal()
+  }
+  plugins {
+    id("com.google.cloud.artifactregistry.gradle.plugin") version "2.2.0"
+  }
+}
+
+buildscript {
+  repositories {
+    gradlePluginPortal()
+  }
+  dependencies {
+    classpath("com.google.cloud.artifactregistry.gradle-plugin:com.google.cloud.artifactregistry.gradle-plugin.gradle.plugin:2.2.0")
+  }
+}
+
+apply plugin: com.google.cloud.artifactregistry.gradle.plugin.ArtifactRegistryGradlePlugin
+
 rootProject.name = 'microdocs-crawler-gradle'
