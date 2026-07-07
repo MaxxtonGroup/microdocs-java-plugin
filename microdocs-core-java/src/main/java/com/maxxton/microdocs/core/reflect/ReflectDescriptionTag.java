@@ -3,7 +3,7 @@ package com.maxxton.microdocs.core.reflect;
 /**
  * @author Steven Hermans
  */
-public class ReflectDescriptionTag {
+public final class ReflectDescriptionTag {
 
   private String tagName;
   private String keyword;

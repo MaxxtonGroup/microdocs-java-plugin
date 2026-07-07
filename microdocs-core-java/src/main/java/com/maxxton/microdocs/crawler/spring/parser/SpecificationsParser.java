@@ -24,7 +24,7 @@ public class SpecificationsParser implements RequestParser {
   }
 
   @Override
-  public List<Parameter> parse(ReflectParameter reflectParameter, ReflectClass controller, ReflectMethod method, SchemaCollector schemaCollector) {
+  public List<Parameter> parse(ReflectParameter reflectParameter, ReflectClass<?> controller, ReflectMethod method, SchemaCollector schemaCollector) {
     List<Parameter> parameters = new ArrayList<>();
 
     ParameterVariable filterParameter = new ParameterVariable();
