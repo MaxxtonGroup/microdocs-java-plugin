@@ -47,6 +47,8 @@ java {
   manifest {
     attributes 'Implementation-Title': 'microdocs-crawler-gradle', 'Implementation-Version': version
   }
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
