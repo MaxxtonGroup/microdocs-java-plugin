@@ -7,7 +7,7 @@ plugins {
   id "com.maxxton.convention" version "5.0.0-RC-3"
 }
 
-// Publishing (mavenJava publication + maxxton-maven-registry repository) is
+// Publishing (mavenJava publication + maxxton-maven-virtual repository) is
 // auto-configured by the com.maxxton.convention plugin once maven-publish
 // and java are detected - see PublishingConfiguration in maxxton-conventions.
 
