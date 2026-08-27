@@ -3,7 +3,7 @@ plugins {
   id "java"
   id "java-library"
   id "maven-publish"
-  id "com.maxxton.convention" version "3.3.2"
+  id "com.maxxton.convention" version "5.0.0-RC-3"
 }
 
 // group and version come from gradle.properties, set before the
