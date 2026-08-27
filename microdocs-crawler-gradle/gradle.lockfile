@@ -1,11 +1,12 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
+# To regenerate this file, run: ./gradlew :dependencies --write-locks
 com.fasterxml.jackson.core:jackson-annotations:2.10.1=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-core:2.10.1=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.fasterxml.jackson.core:jackson-databind:2.10.1=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 com.mashape.unirest:unirest-java:1.4.9=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
-com.maxxton:microdocs-core-java:3.0.0=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.maxxton:microdocs-core-java:5.0.0=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 commons-codec:commons-codec:1.9=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 commons-logging:commons-logging:1.2=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.apache.httpcomponents:httpasyncclient:4.1.1=compileClasspath,integrationTestCompileClasspath,integrationTestRuntimeClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath

@@ -3,20 +3,20 @@ plugins {
   id "java"
   id "java-library"
   id "maven-publish"
-  id "com.maxxton.convention" version "3.3.2"
+  id "com.maxxton.convention" version "5.0.0-RC-3"
 }
 
 // group and version come from gradle.properties, set before the
 // com.maxxton.convention plugin's PublishingConfiguration reads them.
 
-// Publishing (mavenJava publication + maxxton-maven-registry repository) is
+// Publishing (mavenJava publication + maxxton-maven-virtual repository) is
 // auto-configured by the com.maxxton.convention plugin once maven-publish
 // and java are detected - see PublishingConfiguration in maxxton-conventions.
 
 repositories {
   mavenCentral()
   maven {
-    url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-registry"
+    url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-virtual"
   }
 }
 
