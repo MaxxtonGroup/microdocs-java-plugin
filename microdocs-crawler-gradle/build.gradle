@@ -4,7 +4,7 @@ plugins {
   id "java"
   id "java-library"
   id "maven-publish"
-  id "com.maxxton.convention" version "3.3.2"
+  id "com.maxxton.convention" version "5.0.0-RC-3"
 }
 
 // Publishing (mavenJava publication + maxxton-maven-registry repository) is
@@ -12,6 +12,7 @@ plugins {
 // and java are detected - see PublishingConfiguration in maxxton-conventions.
 
 repositories {
+  mavenLocal()
   mavenCentral()
   maven {
     url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-registry"
@@ -23,7 +24,7 @@ dependencies {
   api gradleApi()
   api("com.fasterxml.jackson.core:jackson-databind:2.10.1")
   api("com.mashape.unirest:unirest-java:1.4.9")
-  api("com.maxxton:microdocs-core-java:3.0.0")
+  api("com.maxxton:microdocs-core-java:5.0.0")
 }
 
 // group and version now come from gradle.properties, set before
@@ -47,8 +48,6 @@ java {
   manifest {
     attributes 'Implementation-Title': 'microdocs-crawler-gradle', 'Implementation-Version': version
   }
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
