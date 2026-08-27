@@ -12,10 +12,9 @@ plugins {
 // and java are detected - see PublishingConfiguration in maxxton-conventions.
 
 repositories {
-  mavenLocal()
   mavenCentral()
   maven {
-    url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-registry"
+    url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-virtual"
   }
 }
 
