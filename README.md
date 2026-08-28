@@ -8,6 +8,8 @@ Artifacts publish to Maxxton's internal Maven registry, not Maven Central - no G
 
 `microdocs-crawler-gradle` and `microdocs-core-java` use the `com.maxxton.convention` plugin, which configures the publication and registry automatically. `microdocs-crawler-doclet` never publishes its own artifact - only its fat jar is bundled into `microdocs-crawler-gradle`'s published jar.
 
+Released versions are immutable in Artifact Registry: republishing a version that already exists fails with `400 Bad Request`. Bump the version rather than republishing.
+
 To publish a new version:
 1. Bump `version` in `gradle.properties` for whichever module(s) changed.
 2. Run:
@@ -16,5 +18,4 @@ $ ./publish.sh
 ```
 
 ### Java 8
-Checkout the java8 branch for a Java 8 compatible version. The master branch is based on Java 21.
-
+Checkout the java8 branch for a Java 8 compatible version. The master branch is based on Java 25.
