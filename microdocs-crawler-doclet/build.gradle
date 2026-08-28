@@ -6,6 +6,9 @@ apply plugin: 'base'
 repositories {
   mavenCentral()
   mavenLocal()
+  maven {
+    url "artifactregistry://europe-maven.pkg.dev/dynamic-concept-192711/maxxton-maven-virtual"
+  }
 }
 
 dependencies {
